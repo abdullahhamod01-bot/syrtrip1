@@ -5,6 +5,7 @@ import 'views/splash_view.dart';
 import 'views/hotels_view.dart';
 import 'views/attractions_view.dart';
 import 'views/restaurants_view.dart';
+import 'views/bookings_view.dart';
 import 'views/transport_view.dart';
 import 'views/detail_view.dart';
 import 'views/currency_view.dart';
@@ -92,6 +93,7 @@ class SyrTripApp extends StatelessWidget {
               '/attractions': (context) => const AttractionsView(),
               '/restaurants': (context) => const RestaurantsView(),
               '/transport': (context) => const TransportView(),
+              '/bookings': (context) => const BookingsView(),
               '/currency': (context) => const CurrencyView(),
               DetailView.routeName: (context) => const DetailView(),
             },
