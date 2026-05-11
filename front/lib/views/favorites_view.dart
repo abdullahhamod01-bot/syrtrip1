@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../controllers/favorites_controller.dart';
 import '../widgets/custom_card.dart';
+import '../widgets/custom_appbar.dart';
+import '../widgets/main_drawer.dart';
 import 'detail_view.dart';
 import '../models/hotel_model.dart';
 import '../models/restaurant_model.dart';
@@ -15,6 +17,7 @@ import '../services/transport_service.dart';
 
 class FavoritesView extends StatefulWidget {
   const FavoritesView({super.key});
+
   @override
   State<FavoritesView> createState() => _FavoritesViewState();
 }
@@ -32,6 +35,7 @@ class _FavoritesViewState extends State<FavoritesView> {
 
   Future<void> _loadAll() async {
     favs = await FavoritesController.loadFavorites();
+
     final results = await Future.wait([
       fetchHotels(),
       fetchRestaurants(),
@@ -64,10 +68,13 @@ class _FavoritesViewState extends State<FavoritesView> {
 
   Future<List<HotelModel>> fetchHotels() async {
     try {
-      final res = await http.get(Uri.parse('https://tourism-app-1-fs9e.onrender.com/api/hotels'));
+      final res = await http.get(
+        Uri.parse('https://tourism-app-1-fs9e.onrender.com/api/hotels'),
+      );
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
-        final list = data.map<HotelModel>((e) => HotelModel.fromJson(e)).toList();
+        final list =
+            data.map<HotelModel>((e) => HotelModel.fromJson(e)).toList();
         await HotelService().cacheHotels(list);
         return list;
       }
@@ -77,10 +84,13 @@ class _FavoritesViewState extends State<FavoritesView> {
 
   Future<List<RestaurantModel>> fetchRestaurants() async {
     try {
-      final res = await http.get(Uri.parse('https://tourism-app-1-fs9e.onrender.com/api/restaurants'));
+      final res = await http.get(
+        Uri.parse('https://tourism-app-1-fs9e.onrender.com/api/restaurants'),
+      );
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
-        final list = data.map<RestaurantModel>((e) => RestaurantModel.fromJson(e)).toList();
+        final list =
+            data.map<RestaurantModel>((e) => RestaurantModel.fromJson(e)).toList();
         await RestaurantService().cacheRestaurants(list);
         return list;
       }
@@ -90,10 +100,13 @@ class _FavoritesViewState extends State<FavoritesView> {
 
   Future<List<PlaceModel>> fetchAttractions() async {
     try {
-      final res = await http.get(Uri.parse('https://tourism-app-1-fs9e.onrender.com/api/places?category=attraction'));
+      final res = await http.get(
+        Uri.parse('https://tourism-app-1-fs9e.onrender.com/api/places?category=attraction'),
+      );
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
-        final list = data.map<PlaceModel>((e) => PlaceModel.fromJson(e)).toList();
+        final list =
+            data.map<PlaceModel>((e) => PlaceModel.fromJson(e)).toList();
         await PlaceService().cacheAttractions(list);
         return list;
       }
@@ -103,10 +116,13 @@ class _FavoritesViewState extends State<FavoritesView> {
 
   Future<List<TransportModel>> fetchTransports() async {
     try {
-      final res = await http.get(Uri.parse('https://tourism-app-1-fs9e.onrender.com/api/transport'));
+      final res = await http.get(
+        Uri.parse('https://tourism-app-1-fs9e.onrender.com/api/transport'),
+      );
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
-        final list = data.map<TransportModel>((e) => TransportModel.fromJson(e)).toList();
+        final list =
+            data.map<TransportModel>((e) => TransportModel.fromJson(e)).toList();
         await TransportService().cacheTransport(list);
         return list;
       }
@@ -118,13 +134,21 @@ class _FavoritesViewState extends State<FavoritesView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF7FBFF),
-      appBar: AppBar(backgroundColor: const Color.fromARGB(255, 0, 171, 9), title: const Text('المفضلة'), centerTitle: true),
+
+      drawer: const MainDrawer(),
+      appBar: const CustomAppBar(),
+
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
               padding: const EdgeInsets.all(12),
               child: allItems.isEmpty
-                  ? Center(child: Text('لا توجد عناصر مفضلة بعد', style: TextStyle(color: Colors.grey[600])))
+                  ? Center(
+                      child: Text(
+                        'لا توجد عناصر مفضلة بعد',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                    )
                   : ListView.builder(
                       itemCount: allItems.length,
                       itemBuilder: (context, i) {
@@ -132,7 +156,23 @@ class _FavoritesViewState extends State<FavoritesView> {
                         final item = m['item'];
                         final type = m['type'];
 
-                        return GestureDetector(
+                        return CustomCard(
+                          id: item.id,
+                          title: item.name,
+                          subtitle: item.location,
+                          imagePath: item.images.isNotEmpty
+                              ? item.images.first
+                              : 'assets/images/placeholder.WebP',
+                          rating: item.rating,
+
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () async {
+                              await FavoritesController.toggleFavorite(item.id);
+                              await _loadAll();
+                            },
+                          ),
+
                           onTap: () {
                             Navigator.pushNamed(
                               context,
@@ -150,26 +190,18 @@ class _FavoritesViewState extends State<FavoritesView> {
                                         : type == 'attraction'
                                             ? DetailType.attraction
                                             : DetailType.transport,
-                                phoneNumber: item.phoneNumber,
+
+                                // ✅ الحل النهائي للمشكلة
+                                phoneNumber: (item is HotelModel || item is RestaurantModel)
+                                    ? item.phoneNumber
+                                    : null,
+
                                 locationUrl: item.location,
-                                pricePerNight: item is HotelModel ? item.pricePerNight : null,
+                                pricePerNight:
+                                    item is HotelModel ? item.pricePerNight : null,
                               ),
                             );
                           },
-                          child: CustomCard(
-                            id: item.id,
-                            title: item.name,
-                            subtitle: item.location,
-                            imagePath: item.images.isNotEmpty ? item.images.first : 'assets/images/placeholder.WebP',
-                            rating: item.rating,
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () async {
-                                await FavoritesController.toggleFavorite(item.id);
-                                await _loadAll();
-                              },
-                            ),
-                          ),
                         );
                       },
                     ),

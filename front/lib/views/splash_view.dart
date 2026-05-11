@@ -14,6 +14,8 @@ class SplashView extends StatefulWidget {
 class _SplashViewState extends State<SplashView> with TickerProviderStateMixin {
   final AuthController _auth = AuthController();
 
+  bool _navigated = false;
+
   @override
   void initState() {
     super.initState();
@@ -21,10 +23,18 @@ class _SplashViewState extends State<SplashView> with TickerProviderStateMixin {
   }
 
   Future<void> _checkLogin() async {
-    await Future.delayed(const Duration(seconds: 5)); // مدة الأنميشن
+    await Future.delayed(const Duration(seconds: 5));
+    await _goNext();
+  }
+
+  Future<void> _goNext() async {
+    if (_navigated) return;
+    _navigated = true;
+
     bool loggedIn = await _auth.isLoggedIn();
 
     if (!mounted) return;
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -36,13 +46,19 @@ class _SplashViewState extends State<SplashView> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // أو لون مناسب لخلفية الأنميشن
-      body: Center(
-        child: Lottie.asset(
-          'assets/animations/splash.json',
-          width: 250,
-          height: 250,
-          fit: BoxFit.contain,
+      backgroundColor: Colors.white,
+
+      // ✅ هذا هو التعديل المهم
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _goNext,
+        child: Center(
+          child: Lottie.asset(
+            'assets/animations/splash.json',
+            width: 250,
+            height: 250,
+            fit: BoxFit.contain,
+          ),
         ),
       ),
     );

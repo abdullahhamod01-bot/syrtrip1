@@ -78,13 +78,7 @@ class _MainDrawerState extends State<MainDrawer> {
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 children: [
-                  _drawerItem(
-                    icon: Icons.home_rounded,
-                    title: "الرئيسية",
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                  ),
+                  
 
                   _drawerItem(
                     icon: Icons.hotel,
