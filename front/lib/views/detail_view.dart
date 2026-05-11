@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:traveling_app/controllers/bookings_controller.dart' show BookingsController;
 import 'package:url_launcher/url_launcher.dart';
 import '../widgets/custom_appbar.dart';
 import '../widgets/main_drawer.dart';
@@ -41,6 +42,7 @@ class DetailView extends StatefulWidget {
 }
 
 class _DetailViewState extends State<DetailView> {
+  
   final _controller = TextEditingController();
   final _pageController = PageController();
   int selectedStars = 0;
@@ -51,6 +53,7 @@ class _DetailViewState extends State<DetailView> {
       selectedStars > 0 && _controller.text.trim().isNotEmpty;
 
   @override
+  
   void initState() {
     super.initState();
     Future.delayed(Duration.zero, () async {
@@ -313,25 +316,43 @@ class _DetailViewState extends State<DetailView> {
                 child: const Text('إلغاء'),
                 onPressed: () => Navigator.pop(context),
               ),
-              ElevatedButton(
-                child: const Text('تأكيد الحجز'),
-                onPressed: (selectedDate != null && selectedTime != null)
-                    ? () {
-                        Navigator.pop(context);
-                        final timeStr = '${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}';
-                        final dateStr = '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}';
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              args.type == DetailType.hotel
-                                  ? "تم حجز $selectedCount غرفة بتاريخ $dateStr الساعة $timeStr ✅\nالسعر الإجمالي: ${totalPrice.toStringAsFixed(1)} ل.س"
-                                  : "تم حجز طاولة لـ $selectedCount شخص بتاريخ $dateStr الساعة $timeStr ✅",
-                            ),
-                          ),
-                        );
-                      }
-                    : null,
+          ElevatedButton(
+  child: const Text('تأكيد الحجز'),
+  onPressed: (selectedDate != null && selectedTime != null)
+      ? () async {
+          final timeStr =
+              '${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}';
+          final dateStr =
+              '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}';
+
+          // 🔴 هنا أهم تعديل: حفظ الحجز
+          final booking = {
+            "id": args.id,
+            "title": args.name,
+            "type": args.type.name,
+            "date": dateStr,
+            "time": timeStr,
+            "count": selectedCount,
+            "price": totalPrice,
+            "image": args.images.isNotEmpty ? args.images.first : "",
+          };
+
+        await BookingsController.addBooking(booking);// 👈 مهم جداً
+
+          Navigator.pop(context);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                args.type == DetailType.hotel
+                    ? "تم حجز $selectedCount غرفة بتاريخ $dateStr الساعة $timeStr ✅"
+                    : "تم حجز طاولة لـ $selectedCount شخص بتاريخ $dateStr الساعة $timeStr ✅",
               ),
+            ),
+          );
+        }
+      : null,
+),
             ],
           );
         },
@@ -359,8 +380,7 @@ class _DetailViewState extends State<DetailView> {
                     const SizedBox(height: 12),
                     if (args.locationUrl != null)
                       ElevatedButton.icon(
-                        onPressed: () =>
-                            launchUrl(Uri.parse(args.locationUrl!)),
+                        onPressed: () => Navigator.pushNamed(context, '/map'),
                         icon: const Icon(Icons.location_on),
                         label: const Text("عرض الموقع"),
                         style: ElevatedButton.styleFrom(

@@ -10,6 +10,10 @@ class CustomCard extends StatelessWidget {
   final VoidCallback? onTap;
   final Widget? trailing;
 
+  // ✅ الإضافات الجديدة
+  final double? price;
+  final String? type; // hotel / restaurant / etc
+
   const CustomCard({
     super.key,
     required this.id,
@@ -19,6 +23,8 @@ class CustomCard extends StatelessWidget {
     required this.rating,
     this.onTap,
     this.trailing,
+    this.price,
+    this.type,
   });
 
   Widget _buildImage(String path) {
@@ -72,12 +78,13 @@ class CustomCard extends StatelessWidget {
               ),
               child: _buildImage(imagePath),
             ),
+
             Padding(
               padding: const EdgeInsets.fromLTRB(10, 10, 10, 12),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // النصوص والتقييم
+                  // النصوص
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,9 +98,10 @@ class CustomCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
+
                         const SizedBox(height: 4),
+
                         Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Icon(
                               Icons.location_on,
@@ -114,7 +122,9 @@ class CustomCard extends StatelessWidget {
                             ),
                           ],
                         ),
+
                         const SizedBox(height: 6),
+
                         Row(
                           children: [
                             ...List.generate(
@@ -137,11 +147,25 @@ class CustomCard extends StatelessWidget {
                             ),
                           ],
                         ),
+
+                        // ⭐ السعر (فقط للفنادق)
+                        if (type == "hotel" && price != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              "${price!.toStringAsFixed(0)} ل.س / ليلة",
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green,
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
 
-                  // عنصر إضافي اختياري
+                  // trailing
                   if (trailing != null)
                     Padding(
                       padding: const EdgeInsets.only(left: 6.0),

@@ -22,6 +22,7 @@ class _HotelsViewState extends State<HotelsView> {
   List<String> favs = [];
   List<HotelModel> hotels = [];
   bool isLoading = true;
+
   final filters = ["فلترة حسب الطقس", "فلترة حسب الفصل", "فلترة حسب المدينة"];
 
   @override
@@ -38,17 +39,21 @@ class _HotelsViewState extends State<HotelsView> {
 
   Future<List<HotelModel>> fetchHotels() async {
     try {
-      final response = await http.get(Uri.parse('https://tourism-app-1-fs9e.onrender.com/api/hotels'));
+      final response = await http.get(
+        Uri.parse('https://tourism-app-1-fs9e.onrender.com/api/hotels'),
+      );
+
       if (response.statusCode == 200) {
         final List data = json.decode(response.body);
-        final hotelsList = data.map((e) => HotelModel.fromJson(e)).toList();
-        await HotelService().cacheHotels(hotelsList); // حفظ في sqflite
+        final hotelsList =
+            data.map((e) => HotelModel.fromJson(e)).toList();
+
+        await HotelService().cacheHotels(hotelsList);
         return hotelsList;
       } else {
         throw Exception('فشل تحميل الفنادق');
       }
     } catch (e) {
-      // في حال فشل الاتصال، استخدم الكاش
       return await HotelService().getCachedHotels();
     }
   }
@@ -56,7 +61,10 @@ class _HotelsViewState extends State<HotelsView> {
   Widget _buildTrailing(String id) {
     final isFav = favs.contains(id);
     return IconButton(
-      icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, color: Colors.red),
+      icon: Icon(
+        isFav ? Icons.favorite : Icons.favorite_border,
+        color: Colors.red,
+      ),
       onPressed: () async {
         await FavoritesController.toggleFavorite(id);
         await _loadData();
@@ -66,15 +74,18 @@ class _HotelsViewState extends State<HotelsView> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedFilter = context.watch<FilterProvider>().selectedFilter;
+    final selectedFilter =
+        context.watch<FilterProvider>().selectedFilter;
+
     final filteredHotels = selectedFilter == null
         ? hotels
-        : hotels.where((h) => h.location.contains("دمشق")).toList(); // مثال فلترة
+        : hotels.where((h) => h.location.contains("دمشق")).toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7FBFF),
       drawer: const MainDrawer(),
       appBar: const CustomAppBar(),
+
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
@@ -83,30 +94,60 @@ class _HotelsViewState extends State<HotelsView> {
                   height: 60,
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     child: Row(
                       children: filters.map((filter) {
-                        final isSelected = selectedFilter == filter;
+                        final isSelected =
+                            selectedFilter == filter;
+
                         return Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: ElevatedButton.icon(
                             onPressed: () {
-                              context.read<FilterProvider>().selectFilter(filter);
+                              context
+                                  .read<FilterProvider>()
+                                  .selectFilter(filter);
                             },
                             icon: CircleAvatar(
                               radius: 12,
-                              backgroundColor: isSelected ? Colors.white : const Color(0xFF00C2FF),
-                              child: Icon(Icons.filter_alt, size: 14, color: isSelected ? Colors.black : Colors.white),
+                              backgroundColor: isSelected
+                                  ? Colors.white
+                                  : const Color(0xFF00C2FF),
+                              child: Icon(
+                                Icons.filter_alt,
+                                size: 14,
+                                color: isSelected
+                                    ? Colors.black
+                                    : Colors.white,
+                              ),
                             ),
-                            label: Text(filter, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                            label: Text(
+                              filter,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
+                            ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: isSelected ? const Color(0xFF00C2FF) : Colors.white,
-                              foregroundColor: isSelected ? Colors.white : Colors.black87,
+                              backgroundColor: isSelected
+                                  ? const Color(0xFF00C2FF)
+                                  : Colors.white,
+                              foregroundColor: isSelected
+                                  ? Colors.white
+                                  : Colors.black87,
                               elevation: 1,
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(25),
-                                side: const BorderSide(color: Color(0xFF00C2FF), width: 1),
+                                side: const BorderSide(
+                                  color: Color(0xFF00C2FF),
+                                  width: 1,
+                                ),
                               ),
                             ),
                           ),
@@ -115,12 +156,14 @@ class _HotelsViewState extends State<HotelsView> {
                     ),
                   ),
                 ),
+
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(12),
                     child: GridView.builder(
                       itemCount: filteredHotels.length,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         childAspectRatio: 0.74,
                         crossAxisSpacing: 12,
@@ -128,13 +171,20 @@ class _HotelsViewState extends State<HotelsView> {
                       ),
                       itemBuilder: (context, i) {
                         final h = filteredHotels[i];
+
                         return CustomCard(
                           id: h.id,
                           title: h.name,
                           subtitle: h.location,
                           imagePath: h.images.first,
                           rating: h.rating,
+
+                          // ⭐ مهم جداً
+                          type: "hotel",
+                          price: h.pricePerNight,
+
                           trailing: _buildTrailing(h.id),
+
                           onTap: () {
                             Navigator.pushNamed(
                               context,

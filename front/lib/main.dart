@@ -14,6 +14,7 @@ import 'providers/app_provider.dart';
 import 'providers/hotelas_filter_provider.dart';
 import 'providers/transport_filter_provider.dart';
 import 'providers/restaurant_filter_provider.dart';
+import 'views/map_view.dart';
 import 'providers/attraction_filter_provider.dart';
 import 'providers/comments_provider.dart';
 
@@ -93,8 +94,9 @@ class SyrTripApp extends StatelessWidget {
               '/attractions': (context) => const AttractionsView(),
               '/restaurants': (context) => const RestaurantsView(),
               '/transport': (context) => const TransportView(),
-              '/bookings': (context) => const BookingsView(),
               '/currency': (context) => const CurrencyView(),
+               '/bookings': (context) => const BookingsView(),
+               '/map': (context) => const MapView(),
               DetailView.routeName: (context) => const DetailView(),
             },
           );

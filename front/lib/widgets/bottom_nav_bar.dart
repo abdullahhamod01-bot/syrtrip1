@@ -21,7 +21,9 @@ class BottomNavBar extends StatelessWidget {
         BottomNavigationBarItem(icon: Icon(Icons.hotel), label: "الفنادق"),
         BottomNavigationBarItem(icon: Icon(Icons.location_city), label: "المعالم"),
         BottomNavigationBarItem(icon: Icon(Icons.restaurant), label: "المطاعم"),
+             BottomNavigationBarItem(icon: Icon(Icons.book), label: "الحجوزات"),
         BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "المفضلة"),
+      
       ],
     );
   }

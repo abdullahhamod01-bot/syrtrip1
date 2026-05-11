@@ -1,6 +1,7 @@
 
 // lib/views/home_view.dart
 import 'package:flutter/material.dart';
+import 'package:traveling_app/views/bookings_view.dart';
 import '../views/transport_view.dart';
 import '../views/hotels_view.dart';
 import '../views/attractions_view.dart';
@@ -22,6 +23,7 @@ class _HomeViewState extends State<HomeView> {
     HotelsView(),
     AttractionsView(),
     RestaurantsView(),
+    BookingsView(),
     FavoritesView(),
   ];
 
