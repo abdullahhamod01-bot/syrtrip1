@@ -14,7 +14,6 @@ import 'providers/app_provider.dart';
 import 'providers/hotelas_filter_provider.dart';
 import 'providers/transport_filter_provider.dart';
 import 'providers/restaurant_filter_provider.dart';
-import 'views/map_view.dart';
 import 'providers/attraction_filter_provider.dart';
 import 'providers/comments_provider.dart';
 
@@ -65,7 +64,7 @@ class SyrTripApp extends StatelessWidget {
             ),
 
             darkTheme: ThemeData.dark().copyWith(
-              useMaterial3: true,
+              
               colorScheme: ColorScheme.fromSeed(
                 seedColor: Colors.green,
                 brightness: Brightness.dark,
@@ -96,7 +95,6 @@ class SyrTripApp extends StatelessWidget {
               '/transport': (context) => const TransportView(),
               '/currency': (context) => const CurrencyView(),
                '/bookings': (context) => const BookingsView(),
-               '/map': (context) => const MapView(),
               DetailView.routeName: (context) => const DetailView(),
             },
           );

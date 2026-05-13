@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -51,7 +53,7 @@ class _MainDrawerState extends State<MainDrawer> {
               width: 85,
               height: 85,
               decoration: BoxDecoration(
-                color: const Color(0xFF2E7D63).withOpacity(0.12),
+                color: const Color(0xFF2E7D63),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -217,7 +219,7 @@ class _MainDrawerState extends State<MainDrawer> {
                             ),
                             title: const Text("SyrTrip"),
                             content: const Text(
-                              "تطبيق سياحي لاستكشاف سوريا بطريقة احترافية.",
+                              "إصدار 1.0.0",
                             ),
                           );
                         },

@@ -209,8 +209,8 @@ class _SignupViewState extends State<SignupView> {
                   margin: const EdgeInsets.only(bottom: 20),
                   decoration: BoxDecoration(
                     color: message!.contains("✅")
-                        ? Colors.green.withOpacity(0.1)
-                        : Colors.red.withOpacity(0.1),
+                        ? Colors.green
+                        : Colors.red,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Text(

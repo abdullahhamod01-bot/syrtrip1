@@ -289,23 +289,7 @@ class _LoginViewState extends State<LoginView> {
 
               const SizedBox(height: 16),
 
-              /// google button
-              CustomButton(
-                text: "تسجيل بواسطة Google",
-
-                icon: Icons.g_mobiledata,
-
-                color: Colors.orange,
-
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const HomeView(),
-                    ),
-                  );
-                },
-              ),
+              
 
               const SizedBox(height: 20),
 

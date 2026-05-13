@@ -79,6 +79,7 @@ class _BookingsViewState extends State<BookingsView> {
                     final status = b['status'] ?? '';
                     final type = b['type'] ?? '';
 
+                    var withOpacity = Colors.black;
                     return Container(
                       margin: const EdgeInsets.only(bottom: 14),
                       decoration: BoxDecoration(
@@ -88,7 +89,7 @@ class _BookingsViewState extends State<BookingsView> {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
+                            color: withOpacity,
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           )
@@ -104,7 +105,7 @@ class _BookingsViewState extends State<BookingsView> {
                                 Container(
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
-                                    color: Colors.green.withOpacity(0.1),
+                                    color: Colors.green,
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Icon(
@@ -138,7 +139,7 @@ class _BookingsViewState extends State<BookingsView> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 10, vertical: 6),
                                   decoration: BoxDecoration(
-                                    color: _statusColor(status).withOpacity(0.15),
+                                    color: _statusColor(status),
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Text(
