@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppProvider extends ChangeNotifier {
   String _language = "ar";
@@ -17,6 +18,8 @@ class AppProvider extends ChangeNotifier {
     'SYP': 15000.0,
   };
 
+  var token;
+
   String get language => _language;
   String get currency => _currency;
   String get city => _city;
@@ -28,8 +31,21 @@ class AppProvider extends ChangeNotifier {
   List<String> get currencyCodes => List.unmodifiable(_currencyCodes);
   Map<String, double> get currencyRates => Map.unmodifiable(_currencyRates);
 
-  void changeLanguage(String lang) {
+  AppProvider() {
+    _loadLanguage();
+  }
+
+  Future<void> _loadLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    _language = prefs.getString('language') ?? 'ar';
+    notifyListeners();
+  }
+
+  Future<void> changeLanguage(String lang) async {
+    if (_language == lang) return;
     _language = lang;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('language', lang);
     notifyListeners();
   }
 

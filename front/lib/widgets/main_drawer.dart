@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../controllers/auth_controller.dart';
 import '../providers/app_provider.dart';
+import '../utils/translations.dart';
 import '../views/login_view.dart';
 
 class MainDrawer extends StatefulWidget {
@@ -84,7 +85,7 @@ class _MainDrawerState extends State<MainDrawer> {
 
                   _drawerItem(
                     icon: Icons.hotel,
-                    title: "الفنادق",
+                    title: Translations.tr(context, 'hotels'),
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.pushNamed(context, '/hotels');
@@ -93,7 +94,7 @@ class _MainDrawerState extends State<MainDrawer> {
 
                   _drawerItem(
                     icon: Icons.restaurant,
-                    title: "المطاعم",
+                    title: Translations.tr(context, 'restaurants'),
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.pushNamed(context, '/restaurants');
@@ -102,7 +103,7 @@ class _MainDrawerState extends State<MainDrawer> {
 
                   _drawerItem(
                     icon: Icons.place,
-                    title: "المعالم",
+                    title: Translations.tr(context, 'attractions'),
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.pushNamed(context, '/attractions');
@@ -111,7 +112,7 @@ class _MainDrawerState extends State<MainDrawer> {
 
                   _drawerItem(
                     icon: Icons.directions_bus,
-                    title: "المواصلات",
+                    title: Translations.tr(context, 'transport'),
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.pushNamed(context, '/transport');
@@ -120,7 +121,7 @@ class _MainDrawerState extends State<MainDrawer> {
 
                   _drawerItem(
                     icon: Icons.currency_exchange,
-                    title: "صرف العملة",
+                    title: Translations.tr(context, 'currency'),
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.pushNamed(context, '/currency');
@@ -138,9 +139,9 @@ class _MainDrawerState extends State<MainDrawer> {
                       value: appProvider.isDarkMode,
                       activeColor: const Color(0xFF2E7D63),
                       secondary: const Icon(Icons.dark_mode),
-                      title: const Text(
-                        "الوضع الداكن",
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                      title: Text(
+                        Translations.tr(context, 'dark_mode'),
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       onChanged: (_) {
                         context.read<AppProvider>().toggleTheme();
@@ -151,7 +152,7 @@ class _MainDrawerState extends State<MainDrawer> {
                   /// اللغة
                   _drawerItem(
                     icon: Icons.language,
-                    title: "اللغة",
+                    title: Translations.tr(context, 'language'),
                     onTap: () {
                       showModalBottomSheet(
                         context: context,
@@ -166,9 +167,9 @@ class _MainDrawerState extends State<MainDrawer> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Text(
-                                  "اختر اللغة",
-                                  style: TextStyle(
+                                Text(
+                                  Translations.tr(context, 'choose_language'),
+                                  style: const TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -176,10 +177,10 @@ class _MainDrawerState extends State<MainDrawer> {
                                 const SizedBox(height: 20),
 
                                 _langTile(
-                                  "العربية",
+                                  Translations.tr(context, 'language_arabic'),
                                   Icons.language,
-                                  () {
-                                    context
+                                  () async {
+                                    await context
                                         .read<AppProvider>()
                                         .changeLanguage('ar');
 
@@ -188,10 +189,10 @@ class _MainDrawerState extends State<MainDrawer> {
                                 ),
 
                                 _langTile(
-                                  "English",
+                                  Translations.tr(context, 'language_english'),
                                   Icons.language,
-                                  () {
-                                    context
+                                  () async {
+                                    await context
                                         .read<AppProvider>()
                                         .changeLanguage('en');
 
@@ -208,7 +209,7 @@ class _MainDrawerState extends State<MainDrawer> {
 
                   _drawerItem(
                     icon: Icons.info_outline,
-                    title: "حول التطبيق",
+                    title: Translations.tr(context, 'about_app'),
                     onTap: () {
                       showDialog(
                         context: context,
@@ -218,8 +219,8 @@ class _MainDrawerState extends State<MainDrawer> {
                               borderRadius: BorderRadius.circular(20),
                             ),
                             title: const Text("SyrTrip"),
-                            content: const Text(
-                              "إصدار 1.0.0",
+                            content: Text(
+                              Translations.tr(context, 'app_version'),
                             ),
                           );
                         },
@@ -242,9 +243,9 @@ class _MainDrawerState extends State<MainDrawer> {
                     Icons.logout,
                     color: Colors.red,
                   ),
-                  title: const Text(
-                    "تسجيل الخروج",
-                    style: TextStyle(
+                  title: Text(
+                    Translations.tr(context, 'logout'),
+                    style: const TextStyle(
                       color: Colors.red,
                       fontWeight: FontWeight.bold,
                     ),
@@ -264,8 +265,8 @@ class _MainDrawerState extends State<MainDrawer> {
                     );
 
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('تم تسجيل الخروج'),
+                      SnackBar(
+                        content: Text(Translations.tr(context, 'logged_out')),
                       ),
                     );
                   },

@@ -11,7 +11,7 @@ class AuthController {
   final String baseUrl = "https://tourism-app-1-fs9e.onrender.com/api/auth";
 
 
-  // ✅ تسجيل الدخول  gamil
+  // تسجيل الدخول 
   Future<bool> login(String email, String password) async {
     final url = Uri.parse("$baseUrl/login");
     final res = await http.post(

@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'views/splash_view.dart';
 import 'views/hotels_view.dart';
 import 'views/attractions_view.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'views/restaurants_view.dart';
 import 'views/bookings_view.dart';
 import 'views/transport_view.dart';
 import 'views/detail_view.dart';
 import 'views/currency_view.dart';
-
 import 'providers/app_provider.dart';
 import 'providers/hotelas_filter_provider.dart';
 import 'providers/transport_filter_provider.dart';
 import 'providers/restaurant_filter_provider.dart';
 import 'providers/attraction_filter_provider.dart';
 import 'providers/comments_provider.dart';
+import 'providers/booking_provider.dart';
 
 void main() {
   runApp(const SyrTripApp());
@@ -34,6 +34,7 @@ class SyrTripApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => RestaurantFilterProvider()),
         ChangeNotifierProvider(create: (_) => AttractionFilterProvider()),
         ChangeNotifierProvider(create: (_) => CommentsProvider()),
+        ChangeNotifierProvider(create: (_) => BookingProvider()),
       ],
       child: Consumer<AppProvider>(
         builder: (context, appProvider, _) {
@@ -83,6 +84,16 @@ class SyrTripApp extends StatelessWidget {
               ),
             ),
 
+            locale: Locale(appProvider.language),
+            supportedLocales: const [
+              Locale('ar'),
+              Locale('en'),
+            ],
+            localizationsDelegates: [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
             themeMode: appProvider.isDarkMode
                 ? ThemeMode.dark
                 : ThemeMode.light,

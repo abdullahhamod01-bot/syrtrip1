@@ -11,6 +11,7 @@ import placesRoutes from "./routes/placesRoutes.js";
 import hotelsRoutes from "./routes/hotelsRoutes.js";
 import restaurantsRoutes from "./routes/restaurantsRoutes.js";
 import transportRoutes from "./routes/transportRoutes.js";
+import bookingRoutes from "./routes/bookingRoutes.js";
 import { networkInterfaces } from "os";
 
 // 2. إعدادات البيئة والاتصال بقاعدة البيانات
@@ -27,6 +28,7 @@ app.use("/api/places", placesRoutes);
 app.use("/api/hotels", hotelsRoutes);
 app.use("/api/restaurants", restaurantsRoutes);
 app.use("/api/transport", transportRoutes);
+app.use("/api/bookings", bookingRoutes);
 
 // 4. وظيفة جلب عنوان IP المحلي
 const getLocalIP = () => {

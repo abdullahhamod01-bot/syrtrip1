@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import '../controllers/auth_controller.dart';
+import '../utils/translations.dart';
 import '../widgets/custom_button.dart';
+import '../providers/app_provider.dart';
 import 'login_view.dart';
 
 class SignupView extends StatefulWidget {
@@ -19,6 +23,8 @@ class _SignupViewState extends State<SignupView> {
 
   @override
   Widget build(BuildContext context) {
+    final appProvider = context.watch<AppProvider>();
+
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7F5),
 
@@ -53,21 +59,28 @@ class _SignupViewState extends State<SignupView> {
                       Icons.language,
                       color: Color(0xFF2E7D63),
                     ),
-                    onSelected: (value) {
+                    onSelected: (value) async {
+                      await appProvider.changeLanguage(value);
+                      final label = value == 'ar'
+                          ? Translations.tr(context, 'language_arabic')
+                          : Translations.tr(context, 'language_english');
+
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text("تم اختيار اللغة: $value"),
+                          content: Text(
+                            '${Translations.tr(context, 'language_selected')}$label',
+                          ),
                         ),
                       );
                     },
-                    itemBuilder: (context) => const [
+                    itemBuilder: (context) => [
                       PopupMenuItem(
-                        value: "العربية",
-                        child: Text("العربية"),
+                        value: 'ar',
+                        child: Text(Translations.tr(context, 'language_arabic')),
                       ),
                       PopupMenuItem(
-                        value: "English",
-                        child: Text("English"),
+                        value: 'en',
+                        child: Text(Translations.tr(context, 'language_english')),
                       ),
                     ],
                   ),
@@ -104,10 +117,10 @@ class _SignupViewState extends State<SignupView> {
 
               const SizedBox(height: 25),
 
-              const Center(
+              Center(
                 child: Text(
-                  "إنشاء حساب جديد",
-                  style: TextStyle(
+                  Translations.tr(context, 'signup_title'),
+                  style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF2E7D63),
@@ -117,10 +130,10 @@ class _SignupViewState extends State<SignupView> {
 
               const SizedBox(height: 10),
 
-              const Center(
+              Center(
                 child: Text(
-                  "أنشئ حسابك وابدأ رحلتك السياحية",
-                  style: TextStyle(
+                  Translations.tr(context, 'signup_subtitle'),
+                  style: const TextStyle(
                     color: Colors.grey,
                     fontSize: 15,
                   ),
@@ -135,7 +148,7 @@ class _SignupViewState extends State<SignupView> {
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
-                  hintText: "اسم المستخدم",
+                  hintText: Translations.tr(context, 'username_hint'),
                   prefixIcon: const Icon(
                     Icons.person,
                     color: Color(0xFF2E7D63),
@@ -155,7 +168,7 @@ class _SignupViewState extends State<SignupView> {
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
-                  hintText: "البريد الإلكتروني",
+                  hintText: Translations.tr(context, 'email_hint'),
                   prefixIcon: const Icon(
                     Icons.email,
                     color: Color(0xFF2E7D63),
@@ -176,7 +189,7 @@ class _SignupViewState extends State<SignupView> {
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
-                  hintText: "كلمة المرور",
+                  hintText: Translations.tr(context, 'password_hint'),
                   prefixIcon: const Icon(
                     Icons.lock,
                     color: Color(0xFF2E7D63),
@@ -233,7 +246,7 @@ class _SignupViewState extends State<SignupView> {
                       ),
                     )
                   : CustomButton(
-                      text: "إنشاء الحساب",
+                      text: Translations.tr(context, 'signup_button'),
                       color: const Color(0xFF2E7D63),
                       icon: Icons.person_add,
                       onPressed: () async {
@@ -261,8 +274,8 @@ class _SignupViewState extends State<SignupView> {
                           isLoading = false;
 
                           message = success
-                              ? "تم إنشاء الحساب بنجاح ✅"
-                              : "فشل إنشاء الحساب ❌";
+                              ? Translations.tr(context, 'signup_success')
+                              : Translations.tr(context, 'signup_failed');
                         });
 
                         if (success && mounted) {
@@ -286,7 +299,7 @@ class _SignupViewState extends State<SignupView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("لديك حساب بالفعل؟"),
+                  Text(Translations.tr(context, 'have_account')),
                   TextButton(
                     onPressed: () {
                       Navigator.pushReplacement(
@@ -296,9 +309,9 @@ class _SignupViewState extends State<SignupView> {
                         ),
                       );
                     },
-                    child: const Text(
-                      "تسجيل الدخول",
-                      style: TextStyle(
+                    child: Text(
+                      Translations.tr(context, 'login_text'),
+                      style: const TextStyle(
                         color: Color(0xFF2E7D63),
                         fontWeight: FontWeight.bold,
                       ),
