@@ -3,7 +3,7 @@ import 'dart:async';
 
 class BookingService {
   final Dio _dio = Dio();
-  static const String baseUrl = 'http://10.0.2.3:5000/api';
+  static const String baseUrl = 'https://syrtrip1.onrender.com/api';
 
   Future<dynamic> createBooking({
     required String token,
@@ -60,7 +60,7 @@ class BookingService {
   }) async {
     try {
       String url = '$baseUrl/bookings';
-    final Map<String, dynamic> params = {};
+      final Map<String, dynamic> params = {};
 
       if (itemType != null) params['itemType'] = itemType;
       if (status != null) params['status'] = status;
@@ -68,11 +68,7 @@ class BookingService {
       final response = await _dio.get(
         url,
         queryParameters: params,
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-          },
-        ),
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
       return response.data['bookings'] ?? [];
@@ -88,11 +84,7 @@ class BookingService {
     try {
       final response = await _dio.get(
         '$baseUrl/bookings/$bookingId',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-          },
-        ),
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
       return response.data['booking'];
@@ -114,8 +106,10 @@ class BookingService {
     try {
       final data = {};
 
-      if (checkInDate != null) data['checkInDate'] = checkInDate.toIso8601String();
-      if (checkOutDate != null) data['checkOutDate'] = checkOutDate.toIso8601String();
+      if (checkInDate != null)
+        data['checkInDate'] = checkInDate.toIso8601String();
+      if (checkOutDate != null)
+        data['checkOutDate'] = checkOutDate.toIso8601String();
       if (numberOfGuests != null) data['numberOfGuests'] = numberOfGuests;
       if (notes != null) data['notes'] = notes;
       if (contactPerson != null) data['contactPerson'] = contactPerson;
@@ -124,11 +118,7 @@ class BookingService {
       final response = await _dio.put(
         '$baseUrl/bookings/$bookingId',
         data: data,
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-          },
-        ),
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
       return response.data;
@@ -144,11 +134,7 @@ class BookingService {
     try {
       final response = await _dio.delete(
         '$baseUrl/bookings/$bookingId',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-          },
-        ),
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
       return response.data;
@@ -180,17 +166,11 @@ class BookingService {
     }
   }
 
-  Future<dynamic> getBookingStats({
-    required String token,
-  }) async {
+  Future<dynamic> getBookingStats({required String token}) async {
     try {
       final response = await _dio.get(
         '$baseUrl/bookings/stats/all',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-          },
-        ),
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
       return response.data['stats'];
