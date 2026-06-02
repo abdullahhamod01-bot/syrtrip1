@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:traveling_app/controllers/bookings_controller.dart' show BookingsController;
+import 'package:SyrTrip/controllers/bookings_controller.dart'
+    show BookingsController;
 import 'package:url_launcher/url_launcher.dart';
 import '../widgets/custom_appbar.dart';
 import '../widgets/main_drawer.dart';
@@ -42,7 +43,6 @@ class DetailView extends StatefulWidget {
 }
 
 class _DetailViewState extends State<DetailView> {
-  
   final _controller = TextEditingController();
   final _pageController = PageController();
   int selectedStars = 0;
@@ -53,7 +53,6 @@ class _DetailViewState extends State<DetailView> {
       selectedStars > 0 && _controller.text.trim().isNotEmpty;
 
   @override
-  
   void initState() {
     super.initState();
     Future.delayed(Duration.zero, () async {
@@ -219,148 +218,200 @@ class _DetailViewState extends State<DetailView> {
                   if (args.type == DetailType.hotel ||
                       args.type == DetailType.restaurant) ...[
                     ElevatedButton.icon(
-                 onPressed: () {
-  int selectedCount = args.type == DetailType.hotel ? 1 : 2;
-  DateTime? selectedDate;
-  TimeOfDay? selectedTime;
-  double totalPrice = args.type == DetailType.hotel
-      ? (args.pricePerNight ?? 0) * 1
-      : 0;
+                      onPressed: () {
+                        int selectedCount = args.type == DetailType.hotel
+                            ? 1
+                            : 2;
+                        DateTime? selectedDate;
+                        TimeOfDay? selectedTime;
+                        double totalPrice = args.type == DetailType.hotel
+                            ? (args.pricePerNight ?? 0) * 1
+                            : 0;
 
-  showDialog(
-    context: context,
-    builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: Text(args.type == DetailType.hotel ? 'تفاصيل حجز الغرفة' : 'تفاصيل حجز الطاولة'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(args.type == DetailType.hotel ? 'عدد الغرف (حتى 7):' : 'عدد الأشخاص (حتى 15):'),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.remove),
-                      onPressed: selectedCount > 1
-                          ? () {
-                              setState(() {
-                                selectedCount--;
-                                if (args.type == DetailType.hotel) {
-                               totalPrice = (args.pricePerNight ?? 0) * selectedCount;
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return StatefulBuilder(
+                              builder: (context, setState) {
+                                return AlertDialog(
+                                  title: Text(
+                                    args.type == DetailType.hotel
+                                        ? 'تفاصيل حجز الغرفة'
+                                        : 'تفاصيل حجز الطاولة',
+                                  ),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        args.type == DetailType.hotel
+                                            ? 'عدد الغرف (حتى 7):'
+                                            : 'عدد الأشخاص (حتى 15):',
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.remove),
+                                            onPressed: selectedCount > 1
+                                                ? () {
+                                                    setState(() {
+                                                      selectedCount--;
+                                                      if (args.type ==
+                                                          DetailType.hotel) {
+                                                        totalPrice =
+                                                            (args.pricePerNight ??
+                                                                0) *
+                                                            selectedCount;
+                                                      }
+                                                    });
+                                                  }
+                                                : null,
+                                          ),
+                                          Text(
+                                            '$selectedCount',
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                            ),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.add),
+                                            onPressed:
+                                                selectedCount <
+                                                    (args.type ==
+                                                            DetailType.hotel
+                                                        ? 7
+                                                        : 15)
+                                                ? () {
+                                                    setState(() {
+                                                      selectedCount++;
+                                                      if (args.type ==
+                                                          DetailType.hotel) {
+                                                        totalPrice =
+                                                            (args.pricePerNight ??
+                                                                0) *
+                                                            selectedCount;
+                                                      }
+                                                    });
+                                                  }
+                                                : null,
+                                          ),
+                                        ],
+                                      ),
+                                      if (args.type == DetailType.hotel) ...[
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'السعر الإجمالي: ${totalPrice.toStringAsFixed(1)} ل.س',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                      const SizedBox(height: 16),
+                                      const Text('موعد الحجز:'),
+                                      ElevatedButton.icon(
+                                        icon: const Icon(Icons.calendar_today),
+                                        label: Text(
+                                          selectedDate == null
+                                              ? 'اختر التاريخ'
+                                              : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
+                                        ),
+                                        onPressed: () async {
+                                          final now = DateTime.now();
+                                          final picked = await showDatePicker(
+                                            context: context,
+                                            initialDate: now,
+                                            firstDate: now,
+                                            lastDate: now.add(
+                                              const Duration(days: 365),
+                                            ),
+                                          );
+                                          if (picked != null)
+                                            setState(
+                                              () => selectedDate = picked,
+                                            );
+                                        },
+                                      ),
+                                      const SizedBox(height: 8),
+                                      const Text('الساعة:'),
+                                      ElevatedButton.icon(
+                                        icon: const Icon(Icons.access_time),
+                                        label: Text(
+                                          selectedTime == null
+                                              ? 'اختر الساعة'
+                                              : '${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}',
+                                        ),
+                                        onPressed: () async {
+                                          final picked = await showTimePicker(
+                                            context: context,
+                                            initialTime: TimeOfDay.now(),
+                                          );
+                                          if (picked != null)
+                                            setState(
+                                              () => selectedTime = picked,
+                                            );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      child: const Text('إلغاء'),
+                                      onPressed: () => Navigator.pop(context),
+                                    ),
+                                    ElevatedButton(
+                                      child: const Text('تأكيد الحجز'),
+                                      onPressed:
+                                          (selectedDate != null &&
+                                              selectedTime != null)
+                                          ? () async {
+                                              final timeStr =
+                                                  '${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}';
+                                              final dateStr =
+                                                  '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}';
 
-                                }
-                              });
-                            }
-                          : null,
-                    ),
-                    Text('$selectedCount', style: const TextStyle(fontSize: 18)),
-                    IconButton(
-                      icon: const Icon(Icons.add),
-                      onPressed: selectedCount < (args.type == DetailType.hotel ? 7 : 15)
-                          ? () {
-                              setState(() {
-                                selectedCount++;
-                                if (args.type == DetailType.hotel) {
-                                  totalPrice = (args.pricePerNight ?? 0) * selectedCount;
-                                }
-                              });
-                            }
-                          : null,
-                    ),
-                  ],
-                ),
-                if (args.type == DetailType.hotel) ...[
-                  const SizedBox(height: 8),
-                  Text('السعر الإجمالي: ${totalPrice.toStringAsFixed(1)} ل.س',
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                ],
-                const SizedBox(height: 16),
-                const Text('موعد الحجز:'),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.calendar_today),
-                  label: Text(selectedDate == null
-                      ? 'اختر التاريخ'
-                      : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}'),
-                  onPressed: () async {
-                    final now = DateTime.now();
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: now,
-                      firstDate: now,
-                      lastDate: now.add(const Duration(days: 365)),
-                    );
-                    if (picked != null) setState(() => selectedDate = picked);
-                  },
-                ),
-                const SizedBox(height: 8),
-                const Text('الساعة:'),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.access_time),
-                  label: Text(selectedTime == null
-                      ? 'اختر الساعة'
-                      : '${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}'),
-                  onPressed: () async {
-                    final picked = await showTimePicker(
-                      context: context,
-                      initialTime: TimeOfDay.now(),
-                    );
-                    if (picked != null) setState(() => selectedTime = picked);
-                  },
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                child: const Text('إلغاء'),
-                onPressed: () => Navigator.pop(context),
-              ),
-          ElevatedButton(
-  child: const Text('تأكيد الحجز'),
-  onPressed: (selectedDate != null && selectedTime != null)
-      ? () async {
-          final timeStr =
-              '${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}';
-          final dateStr =
-              '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}';
+                                              // 🔴 هنا أهم تعديل: حفظ الحجز
+                                              final booking = {
+                                                "id": args.id,
+                                                "title": args.name,
+                                                "type": args.type.name,
+                                                "date": dateStr,
+                                                "time": timeStr,
+                                                "count": selectedCount,
+                                                "price": totalPrice,
+                                                "image": args.images.isNotEmpty
+                                                    ? args.images.first
+                                                    : "",
+                                              };
 
-          // 🔴 هنا أهم تعديل: حفظ الحجز
-          final booking = {
-            "id": args.id,
-            "title": args.name,
-            "type": args.type.name,
-            "date": dateStr,
-            "time": timeStr,
-            "count": selectedCount,
-            "price": totalPrice,
-            "image": args.images.isNotEmpty ? args.images.first : "",
-          };
+                                              await BookingsController.addBooking(
+                                                booking,
+                                              ); // 👈 مهم جداً
 
-        await BookingsController.addBooking(booking);// 👈 مهم جداً
+                                              Navigator.pop(context);
 
-          Navigator.pop(context);
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                args.type == DetailType.hotel
-                    ? "تم حجز $selectedCount غرفة بتاريخ $dateStr الساعة $timeStr ✅"
-                    : "تم حجز طاولة لـ $selectedCount شخص بتاريخ $dateStr الساعة $timeStr ✅",
-              ),
-            ),
-          );
-        }
-      : null,
-),
-            ],
-          );
-        },
-      );
-    },
-  );
-},
-
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    args.type ==
+                                                            DetailType.hotel
+                                                        ? "تم حجز $selectedCount غرفة بتاريخ $dateStr الساعة $timeStr ✅"
+                                                        : "تم حجز طاولة لـ $selectedCount شخص بتاريخ $dateStr الساعة $timeStr ✅",
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          : null,
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
 
                       icon: const Icon(Icons.event_available),
                       label: Text(
@@ -427,7 +478,7 @@ class _DetailViewState extends State<DetailView> {
                         onPressed: isCommentValid
                             ? () {
                                 final comment = Comment(
-                                  userName: "أبو عمر",
+                                  userName: "user",
                                   userImage: "assets/yong.png",
                                   text: _controller.text.trim(),
                                   stars: selectedStars,

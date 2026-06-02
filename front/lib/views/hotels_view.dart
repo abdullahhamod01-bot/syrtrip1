@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-import 'package:traveling_app/widgets/custom_appbar.dart';
-import 'package:traveling_app/widgets/main_drawer.dart';
+import 'package:SyrTrip/widgets/custom_appbar.dart';
+import 'package:SyrTrip/widgets/main_drawer.dart';
 import '../models/hotel_model.dart';
 import '../widgets/custom_card.dart';
 import '../controllers/favorites_controller.dart';
@@ -45,8 +45,7 @@ class _HotelsViewState extends State<HotelsView> {
 
       if (response.statusCode == 200) {
         final List data = json.decode(response.body);
-        final hotelsList =
-            data.map((e) => HotelModel.fromJson(e)).toList();
+        final hotelsList = data.map((e) => HotelModel.fromJson(e)).toList();
 
         await HotelService().cacheHotels(hotelsList);
         return hotelsList;
@@ -74,8 +73,7 @@ class _HotelsViewState extends State<HotelsView> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedFilter =
-        context.watch<FilterProvider>().selectedFilter;
+    final selectedFilter = context.watch<FilterProvider>().selectedFilter;
 
     final filteredHotels = selectedFilter == null
         ? hotels
@@ -100,16 +98,15 @@ class _HotelsViewState extends State<HotelsView> {
                     ),
                     child: Row(
                       children: filters.map((filter) {
-                        final isSelected =
-                            selectedFilter == filter;
+                        final isSelected = selectedFilter == filter;
 
                         return Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: ElevatedButton.icon(
                             onPressed: () {
-                              context
-                                  .read<FilterProvider>()
-                                  .selectFilter(filter);
+                              context.read<FilterProvider>().selectFilter(
+                                filter,
+                              );
                             },
                             icon: CircleAvatar(
                               radius: 12,
@@ -119,9 +116,7 @@ class _HotelsViewState extends State<HotelsView> {
                               child: Icon(
                                 Icons.filter_alt,
                                 size: 14,
-                                color: isSelected
-                                    ? Colors.black
-                                    : Colors.white,
+                                color: isSelected ? Colors.black : Colors.white,
                               ),
                             ),
                             label: Text(
@@ -164,11 +159,11 @@ class _HotelsViewState extends State<HotelsView> {
                       itemCount: filteredHotels.length,
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 0.74,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                      ),
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.74,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                          ),
                       itemBuilder: (context, i) {
                         final h = filteredHotels[i];
 

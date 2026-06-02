@@ -1,4 +1,4 @@
-# traveling_app
+# SyrTrip
 
 A new Flutter project.
 
