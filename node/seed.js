@@ -1,9 +1,11 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import bcrypt from "bcryptjs";
 import Place from "./models/placeModel.js";
 import Restaurant from "./models/restaurantModel.js";
 import Transport from "./models/transportModel.js";
 import Hotel from "./models/hotelModel.js";
+import Admin from "./models/adminModel.js";
 
 dotenv.config();
 await mongoose.connect(process.env.MONGO_URI);
@@ -387,5 +389,38 @@ await Transport.insertMany([
     fare: 12.0
   }
 ]);
+
+// ==================== ADMIN SEED DATA ====================
+const hashedPassword = await bcrypt.hash("admin123", 10);
+
+await Admin.deleteMany({}); // تنظيف البيانات القديمة
+
+await Admin.insertMany([
+  {
+    name: "محمد أحمد",
+    email: "admin@syrtrip.com",
+    password: hashedPassword,
+    role: "super_admin",
+    phone: "+963944123456",
+    isActive: true,
+  },
+  {
+    name: "علي الفندق",
+    email: "hotel-manager@syrtrip.com",
+    password: hashedPassword,
+    role: "hotel_manager",
+    phone: "+963944654321",
+    isActive: true,
+  },
+  {
+    name: "خديجة المطعم",
+    email: "restaurant-manager@syrtrip.com",
+    password: hashedPassword,
+    role: "restaurant_manager",
+    phone: "+963944987654",
+    isActive: true,
+  },
+]);
+
 console.log("✅ تم إدخال جميع البيانات بنجاح");
 process.exit();

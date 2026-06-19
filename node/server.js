@@ -1,4 +1,3 @@
-// 1. استيراد المكتبات (تم تحويل require إلى import هنا)
 import dns from 'dns';
 dns.setDefaultResultOrder('ipv4first');
 
@@ -11,29 +10,50 @@ import placesRoutes from "./routes/placesRoutes.js";
 import hotelsRoutes from "./routes/hotelsRoutes.js";
 import restaurantsRoutes from "./routes/restaurantsRoutes.js";
 import transportRoutes from "./routes/transportRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 import { networkInterfaces } from "os";
 
-// 2. إعدادات البيئة والاتصال بقاعدة البيانات
+// إعدادات البيئة والاتصال بقاعدة البيانات
 dotenv.config();
 connectDB();
 
 const app = express();
-app.use(cors());
+
+// ✅ CORS محدد للـ Frontend
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:3002',
+  'https://your-frontend-url.onrender.com', // غيّر هذا لرابط Frontend على Render
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
 app.use(express.json());
 
-// 3. المسارات (Routes)
+// المسارات (Routes)
 app.use("/api/auth", authRoutes);
 app.use("/api/places", placesRoutes);
 app.use("/api/hotels", hotelsRoutes);
 app.use("/api/restaurants", restaurantsRoutes);
 app.use("/api/transport", transportRoutes);
+app.use("/api/admin", adminRoutes);
 
-// 4. وظيفة جلب عنوان IP المحلي
+// وظيفة جلب عنوان IP المحلي
 const getLocalIP = () => {
   const nets = networkInterfaces();
   for (const name of Object.keys(nets)) {
     for (const net of nets[name]) {
-      // التحقق من IPv4
       if ((net.family === "IPv4" || net.family === 4) && !net.internal) {
         return net.address;
       }
@@ -42,7 +62,7 @@ const getLocalIP = () => {
   return "localhost";
 };
 
-// 5. تشغيل السيرفر
+// تشغيل السيرفر
 const PORT = process.env.PORT || 5000;
 const HOST = getLocalIP();
 
