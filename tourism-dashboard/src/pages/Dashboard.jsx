@@ -4,11 +4,10 @@ import {
   Hotel,
   MapPin,
   UtensilsCrossed,
+  Bus,
   TrendingUp,
-  Users,
   Star,
   ArrowUpRight,
-  ArrowDownRight,
   Activity,
 } from "lucide-react";
 
@@ -16,19 +15,22 @@ export default function Dashboard() {
   const [hotels, setHotels] = useState([]);
   const [places, setPlaces] = useState([]);
   const [restaurants, setRestaurants] = useState([]);
+  const [transport, setTransport] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [hotelsRes, placesRes, restaurantsRes] = await Promise.all([
+        const [hotelsRes, placesRes, restaurantsRes, transportRes] = await Promise.all([
           API.get("/hotels"),
           API.get("/places"),
           API.get("/restaurants"),
+          API.get("/transport"),
         ]);
         setHotels(hotelsRes.data);
         setPlaces(placesRes.data);
         setRestaurants(restaurantsRes.data);
+        setTransport(transportRes.data);
       } catch (err) {
         console.error("Error fetching data:", err);
       } finally {
@@ -38,9 +40,8 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
-  // Calculate stats
-  const totalItems = hotels.length + places.length + restaurants.length;
-  const avgRating = [...hotels, ...places, ...restaurants].reduce(
+  const totalItems = hotels.length + places.length + restaurants.length + transport.length;
+  const avgRating = [...hotels, ...places, ...restaurants, ...transport].reduce(
     (acc, item) => acc + (item.rating || 0),
     0
   ) / (totalItems || 1);
@@ -71,16 +72,16 @@ export default function Dashboard() {
       trendUp: true,
     },
     {
-      title: "Avg Rating",
-      value: avgRating.toFixed(1),
-      icon: Star,
+      title: "Transport",
+      value: transport.length,
+      icon: Bus,
       color: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
-      trend: "+5%",
+      trend: "+20%",
       trendUp: true,
     },
   ];
 
-  const recentItems = [...hotels, ...places, ...restaurants]
+  const recentItems = [...hotels, ...places, ...restaurants, ...transport]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 5);
 
@@ -125,11 +126,7 @@ export default function Dashboard() {
       }}
     >
       {/* Header */}
-      <div
-        style={{
-          marginBottom: 32,
-        }}
-      >
+      <div style={{ marginBottom: 32 }}>
         <h1
           style={{
             fontSize: 32,
@@ -225,7 +222,7 @@ export default function Dashboard() {
                   {card.trendUp ? (
                     <ArrowUpRight size={14} />
                   ) : (
-                    <ArrowDownRight size={14} />
+                    <ArrowUpRight size={14} />
                   )}
                   {card.trend}
                 </div>
@@ -312,19 +309,25 @@ export default function Dashboard() {
                 label: "Hotels",
                 value: hotels.length,
                 color: "#667eea",
-                max: Math.max(hotels.length, places.length, restaurants.length, 1),
+                max: Math.max(hotels.length, places.length, restaurants.length, transport.length, 1),
               },
               {
                 label: "Places",
                 value: places.length,
                 color: "#f5576c",
-                max: Math.max(hotels.length, places.length, restaurants.length, 1),
+                max: Math.max(hotels.length, places.length, restaurants.length, transport.length, 1),
               },
               {
                 label: "Restaurants",
                 value: restaurants.length,
                 color: "#4facfe",
-                max: Math.max(hotels.length, places.length, restaurants.length, 1),
+                max: Math.max(hotels.length, places.length, restaurants.length, transport.length, 1),
+              },
+              {
+                label: "Transport",
+                value: transport.length,
+                color: "#fa709a",
+                max: Math.max(hotels.length, places.length, restaurants.length, transport.length, 1),
               },
             ].map((item, i) => (
               <div key={i} style={{ marginBottom: 20 }}>
@@ -391,6 +394,7 @@ export default function Dashboard() {
               { label: "Hotels", value: hotels.length, color: "#667eea" },
               { label: "Places", value: places.length, color: "#f5576c" },
               { label: "Restaurants", value: restaurants.length, color: "#4facfe" },
+              { label: "Transport", value: transport.length, color: "#fa709a" },
             ].map((item, i) => (
               <div
                 key={i}
@@ -511,21 +515,32 @@ export default function Dashboard() {
               recentItems.map((item, i) => {
                 const isHotel = hotels.find((h) => h._id === item._id);
                 const isPlace = places.find((p) => p._id === item._id);
+                const isRestaurant = restaurants.find((r) => r._id === item._id);
+                const isTransport = transport.find((t) => t._id === item._id);
+                
                 const type = isHotel
                   ? "Hotel"
                   : isPlace
                   ? "Place"
-                  : "Restaurant";
+                  : isRestaurant
+                  ? "Restaurant"
+                  : "Transport";
+                  
                 const iconColor = isHotel
                   ? "#667eea"
                   : isPlace
                   ? "#f5576c"
-                  : "#4facfe";
+                  : isRestaurant
+                  ? "#4facfe"
+                  : "#fa709a";
+                  
                 const Icon = isHotel
                   ? Hotel
                   : isPlace
                   ? MapPin
-                  : UtensilsCrossed;
+                  : isRestaurant
+                  ? UtensilsCrossed
+                  : Bus;
 
                 return (
                   <div
@@ -630,7 +645,7 @@ export default function Dashboard() {
               margin: 0,
             }}
           >
-            Manage all your hotels, places, and restaurants in one place
+            Manage all your hotels, places, restaurants, and transport in one place
           </p>
         </div>
         <div

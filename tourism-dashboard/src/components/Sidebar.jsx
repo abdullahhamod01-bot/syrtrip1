@@ -5,6 +5,7 @@ import {
   Hotel,
   MapPin,
   UtensilsCrossed,
+  Bus,
   PlusCircle,
   ChevronLeft,
   ChevronRight,
@@ -20,12 +21,14 @@ export default function Sidebar() {
     { path: "/hotels", icon: Hotel, label: "Hotels" },
     { path: "/places", icon: MapPin, label: "Places" },
     { path: "/restaurants", icon: UtensilsCrossed, label: "Restaurants" },
+    { path: "/transport", icon: Bus, label: "Transport" },
   ];
 
   const addItems = [
     { path: "/add-hotel", icon: PlusCircle, label: "Add Hotel" },
     { path: "/add-place", icon: PlusCircle, label: "Add Place" },
     { path: "/add-restaurant", icon: PlusCircle, label: "Add Restaurant" },
+    { path: "/add-transport", icon: PlusCircle, label: "Add Transport" },
   ];
 
   const isActive = (path) => location.pathname === path;
