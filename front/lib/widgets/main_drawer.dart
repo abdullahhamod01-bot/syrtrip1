@@ -39,9 +39,7 @@ class _MainDrawerState extends State<MainDrawer> {
     return Drawer(
       backgroundColor: const Color(0xFFF5F7F6),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.horizontal(
-          right: Radius.circular(30),
-        ),
+        borderRadius: BorderRadius.horizontal(right: Radius.circular(30)),
       ),
       child: SafeArea(
         child: Column(
@@ -80,8 +78,6 @@ class _MainDrawerState extends State<MainDrawer> {
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 children: [
-                  
-
                   _drawerItem(
                     icon: Icons.hotel,
                     title: "الفنادق",
@@ -124,6 +120,33 @@ class _MainDrawerState extends State<MainDrawer> {
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.pushNamed(context, '/currency');
+                    },
+                  ),
+
+                  _drawerItem(
+                    icon: Icons.favorite,
+                    title: "المفضلة على الخريطة",
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.pushNamed(context, '/favorites-map');
+                    },
+                  ),
+
+                  _drawerItem(
+                    icon: Icons.event,
+                    title: "فعاليات سوريا",
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.pushNamed(context, '/events');
+                    },
+                  ),
+
+                  _drawerItem(
+                    icon: Icons.settings,
+                    title: "الإعدادات",
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.pushNamed(context, '/settings');
                     },
                   ),
 
@@ -175,29 +198,21 @@ class _MainDrawerState extends State<MainDrawer> {
                                 ),
                                 const SizedBox(height: 20),
 
-                                _langTile(
-                                  "العربية",
-                                  Icons.language,
-                                  () {
-                                    context
-                                        .read<AppProvider>()
-                                        .changeLanguage('ar');
+                                _langTile("العربية", Icons.language, () {
+                                  context.read<AppProvider>().setLanguage(
+                                    'ar',
+                                  );
 
-                                    Navigator.pop(context);
-                                  },
-                                ),
+                                  Navigator.pop(context);
+                                }),
 
-                                _langTile(
-                                  "English",
-                                  Icons.language,
-                                  () {
-                                    context
-                                        .read<AppProvider>()
-                                        .changeLanguage('en');
+                                _langTile("English", Icons.language, () {
+                                  context.read<AppProvider>().setLanguage(
+                                    'en',
+                                  );
 
-                                    Navigator.pop(context);
-                                  },
-                                ),
+                                  Navigator.pop(context);
+                                }),
                               ],
                             ),
                           );
@@ -218,9 +233,7 @@ class _MainDrawerState extends State<MainDrawer> {
                               borderRadius: BorderRadius.circular(20),
                             ),
                             title: const Text("SyrTrip"),
-                            content: const Text(
-                              "إصدار 1.0.0",
-                            ),
+                            content: const Text("إصدار 1.0.0"),
                           );
                         },
                       );
@@ -238,10 +251,7 @@ class _MainDrawerState extends State<MainDrawer> {
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: ListTile(
-                  leading: const Icon(
-                    Icons.logout,
-                    color: Colors.red,
-                  ),
+                  leading: const Icon(Icons.logout, color: Colors.red),
                   title: const Text(
                     "تسجيل الخروج",
                     style: TextStyle(
@@ -258,15 +268,11 @@ class _MainDrawerState extends State<MainDrawer> {
 
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => const LoginView(),
-                      ),
+                      MaterialPageRoute(builder: (_) => const LoginView()),
                     );
 
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('تم تسجيل الخروج'),
-                      ),
+                      const SnackBar(content: Text('تم تسجيل الخروج')),
                     );
                   },
                 ),
@@ -292,16 +298,8 @@ class _MainDrawerState extends State<MainDrawer> {
         borderRadius: BorderRadius.circular(18),
       ),
       child: ListTile(
-        leading: Icon(
-          icon,
-          color: const Color(0xFF2E7D63),
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        leading: Icon(icon, color: const Color(0xFF2E7D63)),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
         trailing: const Icon(
           Icons.arrow_forward_ios,
           size: 16,
@@ -312,19 +310,10 @@ class _MainDrawerState extends State<MainDrawer> {
     );
   }
 
-  Widget _langTile(
-    String title,
-    IconData icon,
-    VoidCallback onTap,
-  ) {
+  Widget _langTile(String title, IconData icon, VoidCallback onTap) {
     return ListTile(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      leading: Icon(
-        icon,
-        color: const Color(0xFF2E7D63),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      leading: Icon(icon, color: const Color(0xFF2E7D63)),
       title: Text(title),
       onTap: onTap,
     );

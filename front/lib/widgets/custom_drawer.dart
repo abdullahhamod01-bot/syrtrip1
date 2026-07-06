@@ -27,17 +27,20 @@ class _CustomDrawerState extends State<CustomDrawer> {
   }
 
   Future<void> _loadUserData() async {
-    final name = await AuthController.getUserName();      // ✅ static
-    final email = await AuthController.getUserEmail();    // ✅ static
-    setState(() {
-      userName = name;
-      userEmail = email;
-      isLoading = false;
-    });
+    try {
+      setState(() {
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   Future<void> _logout() async {
-    await AuthController.logout();  // ✅ static - بدون instance
+    final authController = AuthController();
+    await authController.logout();
     if (mounted) {
       Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
     }
@@ -70,10 +73,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
             ),
             accountName: Text(
               userName,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             accountEmail: Text(
               userEmail.isNotEmpty ? userEmail : 'غير متوفر',
@@ -84,17 +84,32 @@ class _CustomDrawerState extends State<CustomDrawer> {
           _buildDrawerItem(icon: Icons.home, title: 'الرئيسية', index: 0),
           _buildDrawerItem(icon: Icons.hotel, title: 'الفنادق', index: 1),
           _buildDrawerItem(icon: Icons.restaurant, title: 'المطاعم', index: 2),
-          _buildDrawerItem(icon: Icons.place, title: 'المعالم السياحية', index: 3),
-          _buildDrawerItem(icon: Icons.directions_bus, title: 'النقل', index: 4),
+          _buildDrawerItem(
+            icon: Icons.place,
+            title: 'المعالم السياحية',
+            index: 3,
+          ),
+          _buildDrawerItem(
+            icon: Icons.directions_bus,
+            title: 'النقل',
+            index: 4,
+          ),
           _buildDrawerItem(icon: Icons.favorite, title: 'المفضلة', index: 5),
           _buildDrawerItem(icon: Icons.book_online, title: 'حجوزاتي', index: 6),
-          _buildDrawerItem(icon: Icons.currency_exchange, title: 'تحويل العملات', index: 7),
+          _buildDrawerItem(
+            icon: Icons.currency_exchange,
+            title: 'تحويل العملات',
+            index: 7,
+          ),
 
           const Divider(),
 
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('تسجيل الخروج', style: TextStyle(color: Colors.red)),
+            title: const Text(
+              'تسجيل الخروج',
+              style: TextStyle(color: Colors.red),
+            ),
             onTap: _logout,
           ),
         ],
