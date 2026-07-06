@@ -7,6 +7,7 @@ import '../widgets/custom_appbar.dart';
 import '../widgets/main_drawer.dart';
 import '../providers/comments_provider.dart';
 import '../controllers/favorites_controller.dart';
+import 'paypal_payment_view.dart';
 
 enum DetailType { hotel, restaurant, attraction, transport }
 
@@ -386,22 +387,48 @@ class _DetailViewState extends State<DetailView> {
 
                                               await BookingsController.addBooking(
                                                 booking,
-                                              ); // 👈 مهم جداً
+                                              );
 
                                               Navigator.pop(context);
 
-                                              ScaffoldMessenger.of(
-                                                context,
-                                              ).showSnackBar(
-                                                SnackBar(
-                                                  content: Text(
-                                                    args.type ==
-                                                            DetailType.hotel
-                                                        ? "تم حجز $selectedCount غرفة بتاريخ $dateStr الساعة $timeStr ✅"
-                                                        : "تم حجز طاولة لـ $selectedCount شخص بتاريخ $dateStr الساعة $timeStr ✅",
+                                              if (args.type ==
+                                                  DetailType.hotel) {
+                                                final result = await Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (_) =>
+                                                        PayPalPaymentView(
+                                                          itemName: args.name,
+                                                          itemType:
+                                                              'غرفة الفندق',
+                                                          amount:
+                                                              '${totalPrice.toStringAsFixed(1)} ل.س',
+                                                        ),
                                                   ),
-                                                ),
-                                              );
+                                                );
+
+                                                if (result == true && mounted) {
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                        'تم الدفع بنجاح وحفظ الحجز ✅',
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
+                                              } else if (mounted) {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                      "تم حجز طاولة لـ $selectedCount شخص بتاريخ $dateStr الساعة $timeStr ✅",
+                                                    ),
+                                                  ),
+                                                );
+                                              }
                                             }
                                           : null,
                                     ),
