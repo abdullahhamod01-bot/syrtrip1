@@ -15,14 +15,24 @@ class TransportView extends StatefulWidget {
 
 class _TransportViewState extends State<TransportView> {
   List<String> favs = [];
+  String _searchQuery = '';
+  String _selectedCity = 'الكل';
+  final List<String> _cities = [
+    'الكل',
+    'دمشق',
+    'حماه',
+    'حلب',
+    'اللاذقية',
+    'حمص',
+  ];
 
   final fixedCars = <TransportModel>[
     TransportModel(
       id: 'lexus-1',
       name: 'ليكزيس LX 600',
-      description: 'سيارة فاخرة مع مكتب المدينة لخدمات الرحلات الخاصة.',
+      description: 'سيارة فاخرة مع مكتب المدينة لخدمات الرحلات الخاصة (دمشق).',
       images: ['assets/images/placeholder.WebP'],
-      location: 'مكتب المدينة',
+      location: 'دمشق',
       rating: 4.8,
       type: 'Lexus',
       fare: 150.0,
@@ -30,9 +40,9 @@ class _TransportViewState extends State<TransportView> {
     TransportModel(
       id: 'mercedes-1',
       name: 'مرسيدس GLE 450',
-      description: 'سيارة فاخرة مع مكتب النور لتجربة قيادة مميزة.',
+      description: 'سيارة فاخرة مع مكتب النور لتجربة قيادة مميزة (حلب).',
       images: ['assets/images/placeholder.WebP'],
-      location: 'مكتب النور',
+      location: 'حلب',
       rating: 4.7,
       type: 'Mercedes',
       fare: 140.0,
@@ -40,9 +50,9 @@ class _TransportViewState extends State<TransportView> {
     TransportModel(
       id: 'bmw-1',
       name: 'بي إم دبليو X5',
-      description: 'سيارة رياضية فاخرة مع مكتب المدينة لرحلات عائلية.',
+      description: 'سيارة رياضية فاخرة مع مكتب المدينة لرحلات عائلية (حمص).',
       images: ['assets/images/placeholder.WebP'],
-      location: 'مكتب المدينة',
+      location: 'حمص',
       rating: 4.6,
       type: 'BMW',
       fare: 130.0,
@@ -76,7 +86,16 @@ class _TransportViewState extends State<TransportView> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredTransports = fixedCars;
+    final filteredTransports = fixedCars.where((t) {
+      final matchesSearch =
+          _searchQuery.isEmpty ||
+          t.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          t.description.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          t.location.toLowerCase().contains(_searchQuery.toLowerCase());
+      final matchesCity =
+          _selectedCity == 'الكل' || t.location.contains(_selectedCity);
+      return matchesSearch && matchesCity;
+    }).toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7FBFF),
@@ -85,18 +104,66 @@ class _TransportViewState extends State<TransportView> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: TextField(
+                    onChanged: (value) => setState(() => _searchQuery = value),
+                    decoration: InputDecoration(
+                      hintText: 'ابحث عن سيارة أو مدينة...',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () =>
+                                  setState(() => _searchQuery = ''),
+                            )
+                          : null,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 1,
+                  child: DropdownButtonFormField<String>(
+                    value: _selectedCity,
+                    items: _cities
+                        .map(
+                          (city) =>
+                              DropdownMenuItem(value: city, child: Text(city)),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) setState(() => _selectedCity = value);
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'المدينة',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: GridView.builder(
                 itemCount: filteredTransports.length,
-                gridDelegate:
-                    const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.74,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                    ),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.74,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                ),
                 itemBuilder: (context, i) {
                   final t = filteredTransports[i];
                   return CustomCard(
@@ -140,5 +207,3 @@ class _TransportViewState extends State<TransportView> {
     );
   }
 }
-
-   

@@ -22,7 +22,17 @@ class _RestaurantsViewState extends State<RestaurantsView> {
   List<String> favs = [];
   List<RestaurantModel> restaurants = [];
   bool isLoading = true;
-  final filters = ["شعبي", "شرقي", "غربي", "حلويات", "إطلالة"];
+  String _searchQuery = '';
+  String _selectedCity = 'الكل';
+  final List<String> _cities = [
+    'الكل',
+    'دمشق',
+    'حماه',
+    'حلب',
+    'اللاذقية',
+    'حمص',
+  ];
+  // filters removed — search + city dropdown are used instead
 
   @override
   void initState() {
@@ -74,11 +84,18 @@ class _RestaurantsViewState extends State<RestaurantsView> {
     final selectedFilter = context
         .watch<RestaurantFilterProvider>()
         .selectedFilter;
-    final filteredRestaurants = selectedFilter == null
-        ? restaurants
-        : restaurants
-              .where((r) => r.cuisineType.contains(selectedFilter))
-              .toList();
+    final filteredRestaurants = restaurants.where((r) {
+      final matchesSearch =
+          _searchQuery.isEmpty ||
+          r.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          r.description.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          r.location.toLowerCase().contains(_searchQuery.toLowerCase());
+      final matchesCity =
+          _selectedCity == 'الكل' || r.location.contains(_selectedCity);
+      final matchesType =
+          selectedFilter == null || r.cuisineType.contains(selectedFilter);
+      return matchesSearch && matchesCity && matchesType;
+    }).toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7FBFF),
@@ -88,68 +105,60 @@ class _RestaurantsViewState extends State<RestaurantsView> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                SizedBox(
-                  height: 60,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                    child: Row(
-                      children: filters.map((filter) {
-                        final isSelected = selectedFilter == filter;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              context
-                                  .read<RestaurantFilterProvider>()
-                                  .selectFilter(filter);
-                            },
-                            icon: CircleAvatar(
-                              radius: 12,
-                              backgroundColor: isSelected
-                                  ? Colors.white
-                                  : const Color(0xFF00C2FF),
-                              child: Icon(
-                                Icons.filter_alt,
-                                size: 14,
-                                color: isSelected ? Colors.black : Colors.white,
-                              ),
-                            ),
-                            label: Text(
-                              filter,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: isSelected
-                                  ? const Color(0xFF00C2FF)
-                                  : Colors.white,
-                              foregroundColor: isSelected
-                                  ? Colors.white
-                                  : Colors.black87,
-                              elevation: 1,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(25),
-                                side: const BorderSide(
-                                  color: Color(0xFF00C2FF),
-                                  width: 1,
-                                ),
-                              ),
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: TextField(
+                          onChanged: (value) =>
+                              setState(() => _searchQuery = value),
+                          decoration: InputDecoration(
+                            hintText: 'ابحث عن مطعم أو مدينة...',
+                            prefixIcon: const Icon(Icons.search),
+                            suffixIcon: _searchQuery.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () =>
+                                        setState(() => _searchQuery = ''),
+                                  )
+                                : null,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                        );
-                      }).toList(),
-                    ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 1,
+                        child: DropdownButtonFormField<String>(
+                          value: _selectedCity,
+                          items: _cities
+                              .map(
+                                (city) => DropdownMenuItem(
+                                  value: city,
+                                  child: Text(city),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null)
+                              setState(() => _selectedCity = value);
+                          },
+                          decoration: InputDecoration(
+                            labelText: 'المدينة',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+                // category filter removed
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(12),

@@ -21,8 +21,18 @@ class _HotelsViewState extends State<HotelsView> {
   List<HotelModel> hotels = [];
   bool isLoading = true;
   String? errorMessage;
+  String _searchQuery = '';
+  String _selectedCity = 'الكل';
+  final List<String> _cities = [
+    'الكل',
+    'دمشق',
+    'حماه',
+    'حلب',
+    'اللاذقية',
+    'حمص',
+  ];
 
-  final filters = ["فلترة حسب الطقس", "فلترة حسب الفصل", "فلترة حسب المدينة"];
+  // filters removed — search + city dropdown are used instead
 
   @override
   void initState() {
@@ -99,9 +109,16 @@ class _HotelsViewState extends State<HotelsView> {
   Widget build(BuildContext context) {
     final selectedFilter = context.watch<FilterProvider>().selectedFilter;
 
-    final filteredHotels = selectedFilter == null
-        ? hotels
-        : hotels.where((h) => h.location.contains("دمشق")).toList();
+    final filteredHotels = hotels.where((h) {
+      final matchesSearch =
+          _searchQuery.isEmpty ||
+          h.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          h.description.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          h.location.toLowerCase().contains(_searchQuery.toLowerCase());
+      final matchesCity =
+          _selectedCity == 'الكل' || h.location.contains(_selectedCity);
+      return matchesSearch && matchesCity;
+    }).toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7FBFF),
@@ -116,72 +133,62 @@ class _HotelsViewState extends State<HotelsView> {
                   ? _buildErrorWidget()
                   : Column(
                       children: [
-                        // ─── الفلاتر ───
-                        SizedBox(
-                          height: 60,
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 10,
-                            ),
-                            child: Row(
-                              children: filters.map((filter) {
-                                final isSelected = selectedFilter == filter;
-
-                                return Padding(
-                                  padding: const EdgeInsets.only(right: 8),
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      context
-                                          .read<FilterProvider>()
-                                          .selectFilter(filter);
-                                    },
-                                    icon: CircleAvatar(
-                                      radius: 12,
-                                      backgroundColor: isSelected
-                                          ? Colors.white
-                                          : const Color(0xFF00C2FF),
-                                      child: Icon(
-                                        Icons.filter_alt,
-                                        size: 14,
-                                        color: isSelected
-                                            ? Colors.black
-                                            : Colors.white,
-                                      ),
-                                    ),
-                                    label: Text(
-                                      filter,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: isSelected
-                                          ? const Color(0xFF00C2FF)
-                                          : Colors.white,
-                                      foregroundColor: isSelected
-                                          ? Colors.white
-                                          : Colors.black87,
-                                      elevation: 1,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(25),
-                                        side: const BorderSide(
-                                          color: Color(0xFF00C2FF),
-                                          width: 1,
-                                        ),
-                                      ),
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: TextField(
+                                  onChanged: (value) =>
+                                      setState(() => _searchQuery = value),
+                                  decoration: InputDecoration(
+                                    hintText: 'ابحث عن فندق أو مدينة...',
+                                    prefixIcon: const Icon(Icons.search),
+                                    suffixIcon: _searchQuery.isNotEmpty
+                                        ? IconButton(
+                                            icon: const Icon(Icons.clear),
+                                            onPressed: () => setState(
+                                              () => _searchQuery = '',
+                                            ),
+                                          )
+                                        : null,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                   ),
-                                );
-                              }).toList(),
-                            ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                flex: 1,
+                                child: DropdownButtonFormField<String>(
+                                  value: _selectedCity,
+                                  items: _cities
+                                      .map(
+                                        (city) => DropdownMenuItem(
+                                          value: city,
+                                          child: Text(city),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (value) {
+                                    if (value != null) {
+                                      setState(() => _selectedCity = value);
+                                    }
+                                  },
+                                  decoration: InputDecoration(
+                                    labelText: 'المدينة',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
+                        // category filter removed
 
                         // ─── Grid ───
                         Expanded(
