@@ -148,7 +148,6 @@ class _EventsViewState extends State<EventsView> {
   ];
 
   List<Map<String, dynamic>> get _categories {
-    final isAr = Provider.of<AppProvider>(context, listen: false).isArabic;
     return [
       {'key': 'all', 'labelAr': 'الكل', 'labelEn': 'All', 'icon': Icons.apps},
       {'key': 'culture', 'labelAr': 'ثقافة', 'labelEn': 'Culture', 'icon': Icons.palette},

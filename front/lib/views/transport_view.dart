@@ -38,7 +38,9 @@ class _TransportViewState extends State<TransportView> {
 
   Future<List<TransportModel>> fetchTransports() async {
     try {
-      final response = await http.get(Uri.parse('https://tourism-app-1-fs9e.onrender.com/api/transport'));
+      final response = await http.get(
+        Uri.parse('https://syr-trip-backend.vercel.app/api/transport'),
+      );
       if (response.statusCode == 200) {
         final List data = json.decode(response.body);
         final list = data.map((e) => TransportModel.fromJson(e)).toList();
@@ -56,7 +58,10 @@ class _TransportViewState extends State<TransportView> {
   Widget _buildTrailing(String id) {
     final isFav = favs.contains(id);
     return IconButton(
-      icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, color: Colors.red),
+      icon: Icon(
+        isFav ? Icons.favorite : Icons.favorite_border,
+        color: Colors.red,
+      ),
       onPressed: () async {
         await FavoritesController.toggleFavorite(id);
         await _loadData();
@@ -66,7 +71,9 @@ class _TransportViewState extends State<TransportView> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedFilter = context.watch<TransportFilterProvider>().selectedFilter;
+    final selectedFilter = context
+        .watch<TransportFilterProvider>()
+        .selectedFilter;
     final filteredTransports = selectedFilter == null
         ? transports
         : transports.where((t) => t.type.contains(selectedFilter)).toList();
@@ -83,7 +90,10 @@ class _TransportViewState extends State<TransportView> {
                   height: 60,
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     child: Row(
                       children: filters.map((filter) {
                         final isSelected = selectedFilter == filter;
@@ -91,25 +101,45 @@ class _TransportViewState extends State<TransportView> {
                           padding: const EdgeInsets.only(right: 8),
                           child: ElevatedButton.icon(
                             onPressed: () {
-                              context.read<TransportFilterProvider>().selectFilter(filter);
+                              context
+                                  .read<TransportFilterProvider>()
+                                  .selectFilter(filter);
                             },
                             icon: CircleAvatar(
                               radius: 12,
-                              backgroundColor: isSelected ? Colors.white : const Color(0xFF00C2FF),
-                              child: Icon(Icons.filter_alt, size: 14, color: isSelected ? Colors.black : Colors.white),
+                              backgroundColor: isSelected
+                                  ? Colors.white
+                                  : const Color(0xFF00C2FF),
+                              child: Icon(
+                                Icons.filter_alt,
+                                size: 14,
+                                color: isSelected ? Colors.black : Colors.white,
+                              ),
                             ),
                             label: Text(
                               filter,
-                              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
                             ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: isSelected ? const Color(0xFF00C2FF) : Colors.white,
-                              foregroundColor: isSelected ? Colors.white : Colors.black87,
+                              backgroundColor: isSelected
+                                  ? const Color(0xFF00C2FF)
+                                  : Colors.white,
+                              foregroundColor: isSelected
+                                  ? Colors.white
+                                  : Colors.black87,
                               elevation: 1,
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(25),
-                                side: const BorderSide(color: Color(0xFF00C2FF), width: 1),
+                                side: const BorderSide(
+                                  color: Color(0xFF00C2FF),
+                                  width: 1,
+                                ),
                               ),
                             ),
                           ),
@@ -123,12 +153,13 @@ class _TransportViewState extends State<TransportView> {
                     padding: const EdgeInsets.all(12),
                     child: GridView.builder(
                       itemCount: filteredTransports.length,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 0.74,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.74,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                          ),
                       itemBuilder: (context, i) {
                         final t = filteredTransports[i];
                         return CustomCard(

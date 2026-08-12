@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'controllers/auth_controller.dart';
+
 import 'views/splash_view.dart';
+import 'views/login_view.dart';
 import 'views/hotels_view.dart';
 import 'views/attractions_view.dart';
 import 'views/restaurants_view.dart';
@@ -20,12 +23,25 @@ import 'providers/restaurant_filter_provider.dart';
 import 'providers/attraction_filter_provider.dart';
 import 'providers/comments_provider.dart';
 
-void main() {
-  runApp(const SyrTripApp());
+// ═══════════════════════════════════════════════════════════════
+// ✅ main() صار async — بنشيك على التوكن قبل ما نبني التطبيق
+// ═══════════════════════════════════════════════════════════════
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final auth = AuthController();
+  final isLoggedIn = await auth.isLoggedIn();
+
+  runApp(SyrTripApp(isLoggedIn: isLoggedIn));
 }
 
 class SyrTripApp extends StatelessWidget {
-  const SyrTripApp({super.key});
+  final bool isLoggedIn;
+
+  const SyrTripApp({
+    super.key,
+    required this.isLoggedIn,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +104,11 @@ class SyrTripApp extends StatelessWidget {
             themeMode: appProvider.isDarkMode
                 ? ThemeMode.dark
                 : ThemeMode.light,
-            home: const SplashView(),
+
+            // ═══════════════════════════════════════════════════
+            // ←←← هون التعديل: بنمرر isLoggedIn للـ SplashView
+            // ═══════════════════════════════════════════════════
+            home: SplashView(isLoggedIn: isLoggedIn),
 
             routes: {
               '/hotels': (context) => const HotelsView(),

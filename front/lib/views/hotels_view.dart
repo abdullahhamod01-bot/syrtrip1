@@ -22,6 +22,7 @@ class _HotelsViewState extends State<HotelsView> {
   List<String> favs = [];
   List<HotelModel> hotels = [];
   bool isLoading = true;
+  String? errorMessage;
 
   final filters = ["فلترة حسب الطقس", "فلترة حسب الفصل", "فلترة حسب المدينة"];
 
@@ -33,28 +34,53 @@ class _HotelsViewState extends State<HotelsView> {
 
   Future<void> _loadData() async {
     favs = await FavoritesController.loadFavorites();
-    hotels = await fetchHotels();
-    if (mounted) setState(() => isLoading = false);
+    await _fetchHotels();
   }
 
-  Future<List<HotelModel>> fetchHotels() async {
+  // ═══════════════════════════════════════════════════════════════
+  // 🔥 هون التعديل الرئيسي — بدل ما نبعت HTTP مباشرة، نستخدم HotelService
+  // ═══════════════════════════════════════════════════════════════
+  Future<void> _fetchHotels() async {
     try {
-      final response = await http.get(
-        Uri.parse('https://tourism-app-1-fs9e.onrender.com/api/hotels'),
-      );
+      // ✅ HotelService بيعمل كلشي: API → JSON → HotelModel → SQLite Cache
+      final hotelsList = await HotelService().getHotels();
 
-      if (response.statusCode == 200) {
-        final List data = json.decode(response.body);
-        final hotelsList = data.map((e) => HotelModel.fromJson(e)).toList();
-
-        await HotelService().cacheHotels(hotelsList);
-        return hotelsList;
-      } else {
-        throw Exception('فشل تحميل الفنادق');
+      if (mounted) {
+        setState(() {
+          hotels = hotelsList;
+          isLoading = false;
+          errorMessage = null;
+        });
       }
     } catch (e) {
-      return await HotelService().getCachedHotels();
+      // ⚠️ لو فشل الـ API (offline أو خطأ)، HotelService جواته بيجيب من الكاش
+      // بس لو بدك تتأكد، بتقدر تجيب من الكاش يدوياً:
+      try {
+        final cached = await HotelService().getCachedHotels();
+        if (mounted) {
+          setState(() {
+            hotels = cached;
+            isLoading = false;
+            errorMessage = cached.isEmpty ? 'ما فيه بيانات مخزنة' : null;
+          });
+        }
+      } catch (cacheError) {
+        if (mounted) {
+          setState(() {
+            isLoading = false;
+            errorMessage = 'فشل تحميل الفنادق';
+          });
+        }
+      }
     }
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 🔄 Pull-to-Refresh — بيجيب بيانات جديدة من السيرفر
+  // ═══════════════════════════════════════════════════════════════
+  Future<void> _refreshHotels() async {
+    setState(() => isLoading = true);
+    await _fetchHotels();
   }
 
   Widget _buildTrailing(String id) {
@@ -86,124 +112,148 @@ class _HotelsViewState extends State<HotelsView> {
 
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                SizedBox(
-                  height: 60,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                    child: Row(
-                      children: filters.map((filter) {
-                        final isSelected = selectedFilter == filter;
+          : RefreshIndicator(
+              onRefresh: _refreshHotels, // ⬅️ سحب للأسفل بيعيد التحميل
+              child: errorMessage != null && hotels.isEmpty
+                  ? _buildErrorWidget()
+                  : Column(
+                      children: [
+                        // ─── الفلاتر ───
+                        SizedBox(
+                          height: 60,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            child: Row(
+                              children: filters.map((filter) {
+                                final isSelected = selectedFilter == filter;
 
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              context.read<FilterProvider>().selectFilter(
-                                filter,
-                              );
-                            },
-                            icon: CircleAvatar(
-                              radius: 12,
-                              backgroundColor: isSelected
-                                  ? Colors.white
-                                  : const Color(0xFF00C2FF),
-                              child: Icon(
-                                Icons.filter_alt,
-                                size: 14,
-                                color: isSelected ? Colors.black : Colors.white,
-                              ),
-                            ),
-                            label: Text(
-                              filter,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: isSelected
-                                  ? const Color(0xFF00C2FF)
-                                  : Colors.white,
-                              foregroundColor: isSelected
-                                  ? Colors.white
-                                  : Colors.black87,
-                              elevation: 1,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(25),
-                                side: const BorderSide(
-                                  color: Color(0xFF00C2FF),
-                                  width: 1,
-                                ),
-                              ),
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      context.read<FilterProvider>().selectFilter(
+                                        filter,
+                                      );
+                                    },
+                                    icon: CircleAvatar(
+                                      radius: 12,
+                                      backgroundColor: isSelected
+                                          ? Colors.white
+                                          : const Color(0xFF00C2FF),
+                                      child: Icon(
+                                        Icons.filter_alt,
+                                        size: 14,
+                                        color: isSelected ? Colors.black : Colors.white,
+                                      ),
+                                    ),
+                                    label: Text(
+                                      filter,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: isSelected
+                                          ? const Color(0xFF00C2FF)
+                                          : Colors.white,
+                                      foregroundColor: isSelected
+                                          ? Colors.white
+                                          : Colors.black87,
+                                      elevation: 1,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(25),
+                                        side: const BorderSide(
+                                          color: Color(0xFF00C2FF),
+                                          width: 1,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
                             ),
                           ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ),
+                        ),
 
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: GridView.builder(
-                      itemCount: filteredHotels.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.74,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
+                        // ─── Grid ───
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: GridView.builder(
+                              itemCount: filteredHotels.length,
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    childAspectRatio: 0.74,
+                                    crossAxisSpacing: 12,
+                                    mainAxisSpacing: 12,
+                                  ),
+                              itemBuilder: (context, i) {
+                                final h = filteredHotels[i];
+
+                                return CustomCard(
+                                  id: h.id,
+                                  title: h.name,
+                                  subtitle: h.location,
+                                  imagePath: h.images.isNotEmpty ? h.images.first : '',
+                                  rating: h.rating,
+                                  type: "hotel",
+                                  price: h.pricePerNight,
+                                  trailing: _buildTrailing(h.id),
+                                  onTap: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      DetailView.routeName,
+                                      arguments: DetailArguments(
+                                        id: h.id,
+                                        name: h.name,
+                                        description: h.description,
+                                        images: h.images,
+                                        rating: h.rating,
+                                        phoneNumber: h.phoneNumber,
+                                        pricePerNight: h.pricePerNight,
+                                        locationUrl: h.location,
+                                        type: DetailType.hotel,
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
                           ),
-                      itemBuilder: (context, i) {
-                        final h = filteredHotels[i];
-
-                        return CustomCard(
-                          id: h.id,
-                          title: h.name,
-                          subtitle: h.location,
-                          imagePath: h.images.first,
-                          rating: h.rating,
-
-                          // ⭐ مهم جداً
-                          type: "hotel",
-                          price: h.pricePerNight,
-
-                          trailing: _buildTrailing(h.id),
-
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              DetailView.routeName,
-                              arguments: DetailArguments(
-                                id: h.id,
-                                name: h.name,
-                                description: h.description,
-                                images: h.images,
-                                rating: h.rating,
-                                phoneNumber: h.phoneNumber,
-                                pricePerNight: h.pricePerNight,
-                                locationUrl: h.location,
-                                type: DetailType.hotel,
-                              ),
-                            );
-                          },
-                        );
-                      },
+                        ),
+                      ],
                     ),
-                  ),
-                ),
-              ],
             ),
+    );
+  }
+
+  Widget _buildErrorWidget() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.wifi_off, size: 64, color: Colors.grey),
+          const SizedBox(height: 16),
+          Text(
+            errorMessage ?? 'فشل الاتصال',
+            style: const TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _refreshHotels,
+            child: const Text('إعادة المحاولة'),
+          ),
+        ],
+      ),
     );
   }
 }

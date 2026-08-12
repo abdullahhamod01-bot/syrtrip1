@@ -40,7 +40,7 @@ class _AttractionsViewState extends State<AttractionsView> {
     try {
       final response = await http.get(
         Uri.parse(
-          'https://tourism-app-1-fs9e.onrender.com/api/places?category=attraction',
+          'https://syr-trip-backend.vercel.app/api/places?category=attraction',
         ),
       );
       if (response.statusCode == 200) {

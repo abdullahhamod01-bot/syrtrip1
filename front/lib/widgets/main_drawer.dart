@@ -78,41 +78,7 @@ class _MainDrawerState extends State<MainDrawer> {
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 children: [
-                  _drawerItem(
-                    icon: Icons.hotel,
-                    title: "الفنادق",
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.pushNamed(context, '/hotels');
-                    },
-                  ),
-
-                  _drawerItem(
-                    icon: Icons.restaurant,
-                    title: "المطاعم",
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.pushNamed(context, '/restaurants');
-                    },
-                  ),
-
-                  _drawerItem(
-                    icon: Icons.place,
-                    title: "المعالم",
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.pushNamed(context, '/attractions');
-                    },
-                  ),
-
-                  _drawerItem(
-                    icon: Icons.directions_bus,
-                    title: "المواصلات",
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.pushNamed(context, '/transport');
-                    },
-                  ),
+                 
 
                   _drawerItem(
                     icon: Icons.currency_exchange,
@@ -125,7 +91,7 @@ class _MainDrawerState extends State<MainDrawer> {
 
                   _drawerItem(
                     icon: Icons.favorite,
-                    title: "المفضلة على الخريطة",
+                    title: " الخريطة",
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.pushNamed(context, '/favorites-map');

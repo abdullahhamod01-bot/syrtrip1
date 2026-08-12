@@ -69,12 +69,13 @@ class _FavoritesViewState extends State<FavoritesView> {
   Future<List<HotelModel>> fetchHotels() async {
     try {
       final res = await http.get(
-        Uri.parse('https://tourism-app-1-fs9e.onrender.com/api/hotels'),
+        Uri.parse('https://syr-trip-backend.vercel.app/api/hotels'),
       );
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
-        final list =
-            data.map<HotelModel>((e) => HotelModel.fromJson(e)).toList();
+        final list = data
+            .map<HotelModel>((e) => HotelModel.fromJson(e))
+            .toList();
         await HotelService().cacheHotels(list);
         return list;
       }
@@ -85,12 +86,13 @@ class _FavoritesViewState extends State<FavoritesView> {
   Future<List<RestaurantModel>> fetchRestaurants() async {
     try {
       final res = await http.get(
-        Uri.parse('https://tourism-app-1-fs9e.onrender.com/api/restaurants'),
+        Uri.parse('https://syr-trip-backend.vercel.app/api/restaurants'),
       );
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
-        final list =
-            data.map<RestaurantModel>((e) => RestaurantModel.fromJson(e)).toList();
+        final list = data
+            .map<RestaurantModel>((e) => RestaurantModel.fromJson(e))
+            .toList();
         await RestaurantService().cacheRestaurants(list);
         return list;
       }
@@ -101,12 +103,15 @@ class _FavoritesViewState extends State<FavoritesView> {
   Future<List<PlaceModel>> fetchAttractions() async {
     try {
       final res = await http.get(
-        Uri.parse('https://tourism-app-1-fs9e.onrender.com/api/places?category=attraction'),
+        Uri.parse(
+          'https://syr-trip-backend.vercel.app/api/places?category=attraction',
+        ),
       );
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
-        final list =
-            data.map<PlaceModel>((e) => PlaceModel.fromJson(e)).toList();
+        final list = data
+            .map<PlaceModel>((e) => PlaceModel.fromJson(e))
+            .toList();
         await PlaceService().cacheAttractions(list);
         return list;
       }
@@ -117,12 +122,13 @@ class _FavoritesViewState extends State<FavoritesView> {
   Future<List<TransportModel>> fetchTransports() async {
     try {
       final res = await http.get(
-        Uri.parse('https://tourism-app-1-fs9e.onrender.com/api/transport'),
+        Uri.parse('https://syr-trip-backend.vercel.app/api/transport'),
       );
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
-        final list =
-            data.map<TransportModel>((e) => TransportModel.fromJson(e)).toList();
+        final list = data
+            .map<TransportModel>((e) => TransportModel.fromJson(e))
+            .toList();
         await TransportService().cacheTransport(list);
         return list;
       }
@@ -186,19 +192,22 @@ class _FavoritesViewState extends State<FavoritesView> {
                                 type: type == 'hotel'
                                     ? DetailType.hotel
                                     : type == 'restaurant'
-                                        ? DetailType.restaurant
-                                        : type == 'attraction'
-                                            ? DetailType.attraction
-                                            : DetailType.transport,
+                                    ? DetailType.restaurant
+                                    : type == 'attraction'
+                                    ? DetailType.attraction
+                                    : DetailType.transport,
 
                                 // ✅ الحل النهائي للمشكلة
-                                phoneNumber: (item is HotelModel || item is RestaurantModel)
+                                phoneNumber:
+                                    (item is HotelModel ||
+                                        item is RestaurantModel)
                                     ? item.phoneNumber
                                     : null,
 
                                 locationUrl: item.location,
-                                pricePerNight:
-                                    item is HotelModel ? item.pricePerNight : null,
+                                pricePerNight: item is HotelModel
+                                    ? item.pricePerNight
+                                    : null,
                               ),
                             );
                           },

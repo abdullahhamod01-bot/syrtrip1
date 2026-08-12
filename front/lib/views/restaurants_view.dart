@@ -38,7 +38,9 @@ class _RestaurantsViewState extends State<RestaurantsView> {
 
   Future<List<RestaurantModel>> fetchRestaurants() async {
     try {
-      final response = await http.get(Uri.parse('https://tourism-app-1-fs9e.onrender.com/api/restaurants'));
+      final response = await http.get(
+        Uri.parse('https://syr-trip-backend.vercel.app/api/restaurants'),
+      );
       if (response.statusCode == 200) {
         final List data = json.decode(response.body);
         final list = data.map((e) => RestaurantModel.fromJson(e)).toList();
@@ -56,7 +58,10 @@ class _RestaurantsViewState extends State<RestaurantsView> {
   Widget _buildTrailing(String id) {
     final isFav = favs.contains(id);
     return IconButton(
-      icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, color: Colors.red),
+      icon: Icon(
+        isFav ? Icons.favorite : Icons.favorite_border,
+        color: Colors.red,
+      ),
       onPressed: () async {
         await FavoritesController.toggleFavorite(id);
         await _loadData();
@@ -66,10 +71,14 @@ class _RestaurantsViewState extends State<RestaurantsView> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedFilter = context.watch<RestaurantFilterProvider>().selectedFilter;
+    final selectedFilter = context
+        .watch<RestaurantFilterProvider>()
+        .selectedFilter;
     final filteredRestaurants = selectedFilter == null
         ? restaurants
-        : restaurants.where((r) => r.cuisineType.contains(selectedFilter)).toList();
+        : restaurants
+              .where((r) => r.cuisineType.contains(selectedFilter))
+              .toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7FBFF),
@@ -83,7 +92,10 @@ class _RestaurantsViewState extends State<RestaurantsView> {
                   height: 60,
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     child: Row(
                       children: filters.map((filter) {
                         final isSelected = selectedFilter == filter;
@@ -91,22 +103,45 @@ class _RestaurantsViewState extends State<RestaurantsView> {
                           padding: const EdgeInsets.only(right: 8),
                           child: ElevatedButton.icon(
                             onPressed: () {
-                              context.read<RestaurantFilterProvider>().selectFilter(filter);
+                              context
+                                  .read<RestaurantFilterProvider>()
+                                  .selectFilter(filter);
                             },
                             icon: CircleAvatar(
                               radius: 12,
-                              backgroundColor: isSelected ? Colors.white : const Color(0xFF00C2FF),
-                              child: Icon(Icons.filter_alt, size: 14, color: isSelected ? Colors.black : Colors.white),
+                              backgroundColor: isSelected
+                                  ? Colors.white
+                                  : const Color(0xFF00C2FF),
+                              child: Icon(
+                                Icons.filter_alt,
+                                size: 14,
+                                color: isSelected ? Colors.black : Colors.white,
+                              ),
                             ),
-                            label: Text(filter, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                            label: Text(
+                              filter,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
+                            ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: isSelected ? const Color(0xFF00C2FF) : Colors.white,
-                              foregroundColor: isSelected ? Colors.white : Colors.black87,
+                              backgroundColor: isSelected
+                                  ? const Color(0xFF00C2FF)
+                                  : Colors.white,
+                              foregroundColor: isSelected
+                                  ? Colors.white
+                                  : Colors.black87,
                               elevation: 1,
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(25),
-                                side: const BorderSide(color: Color(0xFF00C2FF), width: 1),
+                                side: const BorderSide(
+                                  color: Color(0xFF00C2FF),
+                                  width: 1,
+                                ),
                               ),
                             ),
                           ),
@@ -120,12 +155,13 @@ class _RestaurantsViewState extends State<RestaurantsView> {
                     padding: const EdgeInsets.all(12),
                     child: GridView.builder(
                       itemCount: filteredRestaurants.length,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 0.74,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.74,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                          ),
                       itemBuilder: (context, i) {
                         final r = filteredRestaurants[i];
                         return CustomCard(

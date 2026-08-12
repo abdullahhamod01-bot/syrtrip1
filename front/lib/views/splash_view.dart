@@ -5,15 +5,15 @@ import 'login_view.dart';
 import 'home_view.dart';
 
 class SplashView extends StatefulWidget {
-  const SplashView({super.key});
+  const SplashView({super.key, required this.isLoggedIn});
+
+  final bool isLoggedIn;
 
   @override
   State<SplashView> createState() => _SplashViewState();
 }
 
 class _SplashViewState extends State<SplashView> with TickerProviderStateMixin {
-  final AuthController _auth = AuthController();
-
   bool _navigated = false;
 
   @override
@@ -31,14 +31,13 @@ class _SplashViewState extends State<SplashView> with TickerProviderStateMixin {
     if (_navigated) return;
     _navigated = true;
 
-    bool loggedIn = await _auth.isLoggedIn();
-
     if (!mounted) return;
 
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => loggedIn ? const HomeView() : const LoginView(),
+        builder: (_) =>
+            widget.isLoggedIn ? const HomeView() : const LoginView(),
       ),
     );
   }

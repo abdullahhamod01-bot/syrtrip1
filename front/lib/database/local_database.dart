@@ -70,8 +70,40 @@ class LocalDatabase {
   static Future<void> insertHotels(List<Map<String, dynamic>> hotels) async {
     final db = await getDatabase();
     for (var hotel in hotels) {
-      await db.insert('hotels', hotel, conflictAlgorithm: ConflictAlgorithm.replace);
+      await db.insert(
+        'hotels',
+        hotel,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
     }
+  }
+
+  // 🏨 حفظ فندق واحد
+  static Future<void> insertHotel(Map<String, dynamic> hotel) async {
+    final db = await getDatabase();
+    await db.insert(
+      'hotels',
+      hotel,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  // 🏨 تحديث فندق واحد
+  static Future<void> updateHotel(String id, Map<String, dynamic> hotel) async {
+    final db = await getDatabase();
+    await db.update(
+      'hotels',
+      hotel,
+      where: 'id = ?',
+      whereArgs: [id],
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  // 🏨 حذف فندق واحد
+  static Future<void> deleteHotel(String id) async {
+    final db = await getDatabase();
+    await db.delete('hotels', where: 'id = ?', whereArgs: [id]);
   }
 
   // 🏨 استرجاع الفنادق
@@ -80,11 +112,29 @@ class LocalDatabase {
     return await db.query('hotels');
   }
 
-  // 🍽️ حفظ المطاعم
-  static Future<void> insertRestaurants(List<Map<String, dynamic>> restaurants) async {
+  // � استرجاع فندق بحسب id
+  static Future<Map<String, dynamic>?> getHotelById(String id) async {
+    final db = await getDatabase();
+    final result = await db.query(
+      'hotels',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    return result.isNotEmpty ? result.first : null;
+  }
+
+  // �🍽️ حفظ المطاعم
+  static Future<void> insertRestaurants(
+    List<Map<String, dynamic>> restaurants,
+  ) async {
     final db = await getDatabase();
     for (var restaurant in restaurants) {
-      await db.insert('restaurants', restaurant, conflictAlgorithm: ConflictAlgorithm.replace);
+      await db.insert(
+        'restaurants',
+        restaurant,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
     }
   }
 
@@ -95,10 +145,16 @@ class LocalDatabase {
   }
 
   // 🏞️ حفظ المعالم السياحية
-  static Future<void> insertAttractions(List<Map<String, dynamic>> attractions) async {
+  static Future<void> insertAttractions(
+    List<Map<String, dynamic>> attractions,
+  ) async {
     final db = await getDatabase();
     for (var place in attractions) {
-      await db.insert('attractions', place, conflictAlgorithm: ConflictAlgorithm.replace);
+      await db.insert(
+        'attractions',
+        place,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
     }
   }
 
@@ -109,10 +165,16 @@ class LocalDatabase {
   }
 
   // 🚗 حفظ وسائل النقل
-  static Future<void> insertTransport(List<Map<String, dynamic>> transports) async {
+  static Future<void> insertTransport(
+    List<Map<String, dynamic>> transports,
+  ) async {
     final db = await getDatabase();
     for (var transport in transports) {
-      await db.insert('transport', transport, conflictAlgorithm: ConflictAlgorithm.replace);
+      await db.insert(
+        'transport',
+        transport,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
     }
   }
 
