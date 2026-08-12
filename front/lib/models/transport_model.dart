@@ -22,20 +22,18 @@ class TransportModel extends PlaceModel {
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       images: List<String>.from(json['images'] ?? []),
-      location: json['location'] ?? '',
-      rating: (json['rating'] ?? 0).toDouble(),
+      location: json['office'] != null
+          ? json['office']['location'] ?? json['location'] ?? ''
+          : json['location'] ?? '',
+      rating: (json['rating'] ?? json['avgRating'] ?? 0).toDouble(),
       type: json['type'] ?? '',
-      fare: (json['fare'] ?? 0).toDouble(),
+      fare: (json['pricePerDay'] ?? json['fare'] ?? 0).toDouble(),
     );
   }
 
   @override
   Map<String, dynamic> toMap() {
-    return {
-      ...super.toMap(),
-      'type': type,
-      'fare': fare,
-    };
+    return {...super.toMap(), 'type': type, 'fare': fare};
   }
 
   factory TransportModel.fromMap(Map<String, dynamic> map) {

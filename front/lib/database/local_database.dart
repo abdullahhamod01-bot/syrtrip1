@@ -9,7 +9,7 @@ class LocalDatabase {
     final path = join(await getDatabasesPath(), 'tourism.db');
     _db = await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE hotels (
@@ -61,6 +61,35 @@ class LocalDatabase {
             images TEXT
           )
         ''');
+
+        await db.execute('''
+          CREATE TABLE offices (
+            id TEXT PRIMARY KEY,
+            name TEXT,
+            description TEXT,
+            location TEXT,
+            lat REAL,
+            lng REAL,
+            phone TEXT,
+            ownerId TEXT
+          )
+        ''');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute('''
+            CREATE TABLE IF NOT EXISTS offices (
+              id TEXT PRIMARY KEY,
+              name TEXT,
+              description TEXT,
+              location TEXT,
+              lat REAL,
+              lng REAL,
+              phone TEXT,
+              ownerId TEXT
+            )
+          ''');
+        }
       },
     );
     return _db!;
@@ -182,5 +211,23 @@ class LocalDatabase {
   static Future<List<Map<String, dynamic>>> getTransport() async {
     final db = await getDatabase();
     return await db.query('transport');
+  }
+
+  // 🏢 حفظ مكاتب السيارات
+  static Future<void> insertOffices(List<Map<String, dynamic>> offices) async {
+    final db = await getDatabase();
+    for (var office in offices) {
+      await db.insert(
+        'offices',
+        office,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+  }
+
+  // 🏢 استرجاع مكاتب السيارات
+  static Future<List<Map<String, dynamic>>> getOffices() async {
+    final db = await getDatabase();
+    return await db.query('offices');
   }
 }

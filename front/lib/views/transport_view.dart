@@ -1,5 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import '../models/transport_model.dart';
+import '../models/office_model.dart';
+import '../services/car_service.dart';
+import '../services/office_service.dart';
 import '../widgets/custom_card.dart';
 import '../controllers/favorites_controller.dart';
 import '../widgets/custom_appbar.dart';
@@ -15,6 +21,8 @@ class TransportView extends StatefulWidget {
 
 class _TransportViewState extends State<TransportView> {
   List<String> favs = [];
+  List<TransportModel> cars = [];
+  List<OfficeModel> offices = [];
   String _searchQuery = '';
   String _selectedCity = 'الكل';
   final List<String> _cities = [
@@ -26,43 +34,53 @@ class _TransportViewState extends State<TransportView> {
     'حمص',
   ];
 
-  final fixedCars = <TransportModel>[
-    TransportModel(
-      id: 'lexus-1',
-      name: 'ليكزيس LX 600',
-      description: 'سيارة فاخرة مع مكتب المدينة لخدمات الرحلات الخاصة (دمشق).',
-      images: ['assets/images/placeholder.WebP'],
-      location: 'دمشق',
-      rating: 4.8,
-      type: 'Lexus',
-      fare: 150.0,
-    ),
-    TransportModel(
-      id: 'mercedes-1',
-      name: 'مرسيدس GLE 450',
-      description: 'سيارة فاخرة مع مكتب النور لتجربة قيادة مميزة (حلب).',
-      images: ['assets/images/placeholder.WebP'],
-      location: 'حلب',
-      rating: 4.7,
-      type: 'Mercedes',
-      fare: 140.0,
-    ),
-    TransportModel(
-      id: 'bmw-1',
-      name: 'بي إم دبليو X5',
-      description: 'سيارة رياضية فاخرة مع مكتب المدينة لرحلات عائلية (حمص).',
-      images: ['assets/images/placeholder.WebP'],
-      location: 'حمص',
-      rating: 4.6,
-      type: 'BMW',
-      fare: 130.0,
-    ),
-  ];
-
   @override
   void initState() {
     super.initState();
-    _loadFavorites();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    favs = await FavoritesController.loadFavorites();
+    await _fetchOffices();
+    await _fetchCars();
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _fetchOffices() async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://syr-trip-backend.vercel.app/api/offices'),
+      );
+      if (response.statusCode == 200) {
+        final body = json.decode(response.body);
+        final List data = body['offices'] ?? [];
+        offices = data
+            .map<OfficeModel>((e) => OfficeModel.fromJson(e))
+            .toList();
+        await OfficeService().cacheOffices(offices);
+      }
+    } catch (_) {
+      offices = await OfficeService().getCachedOffices();
+    }
+  }
+
+  Future<void> _fetchCars() async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://syr-trip-backend.vercel.app/api/cars'),
+      );
+      if (response.statusCode == 200) {
+        final body = json.decode(response.body);
+        final List data = body['cars'] ?? [];
+        cars = data
+            .map<TransportModel>((e) => TransportModel.fromJson(e))
+            .toList();
+        await CarService().cacheCars(cars);
+      }
+    } catch (_) {
+      cars = await CarService().getCachedCars();
+    }
   }
 
   Future<void> _loadFavorites() async {
@@ -86,7 +104,7 @@ class _TransportViewState extends State<TransportView> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredTransports = fixedCars.where((t) {
+    final filteredTransports = cars.where((t) {
       final matchesSearch =
           _searchQuery.isEmpty ||
           t.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||

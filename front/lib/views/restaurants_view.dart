@@ -52,8 +52,11 @@ class _RestaurantsViewState extends State<RestaurantsView> {
         Uri.parse('https://syr-trip-backend.vercel.app/api/restaurants'),
       );
       if (response.statusCode == 200) {
-        final List data = json.decode(response.body);
-        final list = data.map((e) => RestaurantModel.fromJson(e)).toList();
+        final body = json.decode(response.body);
+        final List data = body['restaurants'] ?? [];
+        final list = data
+            .map<RestaurantModel>((e) => RestaurantModel.fromJson(e))
+            .toList();
         await RestaurantService().cacheRestaurants(list); // حفظ في sqflite
         return list;
       } else {

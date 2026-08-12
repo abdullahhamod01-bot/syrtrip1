@@ -7,7 +7,7 @@ class PlaceModel {
   final List<String> images;
   final String location;
   final double rating;
-// الباني
+  // الباني
   PlaceModel({
     required this.id,
     required this.name,
@@ -17,7 +17,7 @@ class PlaceModel {
     required this.rating,
   });
 
-// لتحويل البيانات القادمة من قاعدة البيانات الى كائن بلغة دارت 
+  // لتحويل البيانات القادمة من قاعدة البيانات الى كائن بلغة دارت
 
   factory PlaceModel.fromJson(Map<String, dynamic> json) {
     return PlaceModel(
@@ -26,10 +26,10 @@ class PlaceModel {
       description: json['description'] ?? '',
       images: List<String>.from(json['images'] ?? []),
       location: json['location'] ?? '',
-      rating: (json['rating'] ?? 0).toDouble(),
+      rating: (json['rating'] ?? json['avgRating'] ?? 0).toDouble(),
     );
   }
-// لتحويل البيانات القادمة من قاعدة البيانات الى ماب  لتخزينها في قاعدة البيانات المحلية  
+  // لتحويل البيانات القادمة من قاعدة البيانات الى ماب  لتخزينها في قاعدة البيانات المحلية
 
   Map<String, dynamic> toMap() {
     return {
@@ -41,7 +41,7 @@ class PlaceModel {
       'rating': rating,
     };
   }
-// لتحويل البيانات القادمة من قاعدة البيانات المحلية  الى مائن ليتم عرضه  
+  // لتحويل البيانات القادمة من قاعدة البيانات المحلية  الى مائن ليتم عرضه
 
   factory PlaceModel.fromMap(Map<String, dynamic> map) {
     return PlaceModel(

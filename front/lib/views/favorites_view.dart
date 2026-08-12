@@ -89,7 +89,8 @@ class _FavoritesViewState extends State<FavoritesView> {
         Uri.parse('https://syr-trip-backend.vercel.app/api/restaurants'),
       );
       if (res.statusCode == 200) {
-        final data = json.decode(res.body);
+        final body = json.decode(res.body);
+        final data = body['restaurants'] ?? [];
         final list = data
             .map<RestaurantModel>((e) => RestaurantModel.fromJson(e))
             .toList();
@@ -103,12 +104,11 @@ class _FavoritesViewState extends State<FavoritesView> {
   Future<List<PlaceModel>> fetchAttractions() async {
     try {
       final res = await http.get(
-        Uri.parse(
-          'https://syr-trip-backend.vercel.app/api/places?category=attraction',
-        ),
+        Uri.parse('https://syr-trip-backend.vercel.app/api/landmarks'),
       );
       if (res.statusCode == 200) {
-        final data = json.decode(res.body);
+        final body = json.decode(res.body);
+        final data = body['landmarks'] ?? [];
         final list = data
             .map<PlaceModel>((e) => PlaceModel.fromJson(e))
             .toList();

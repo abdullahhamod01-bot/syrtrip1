@@ -49,12 +49,11 @@ class _AttractionsViewState extends State<AttractionsView> {
   Future<List<PlaceModel>> fetchAttractions() async {
     try {
       final response = await http.get(
-        Uri.parse(
-          'https://syr-trip-backend.vercel.app/api/places?category=attraction',
-        ),
+        Uri.parse('https://syr-trip-backend.vercel.app/api/landmarks'),
       );
       if (response.statusCode == 200) {
-        final List data = json.decode(response.body);
+        final body = json.decode(response.body);
+        final List data = body['landmarks'] ?? [];
         final places = data.map((e) => PlaceModel.fromJson(e)).toList();
         await PlaceService().cacheAttractions(places); // حفظ في sqflite
         return places;
