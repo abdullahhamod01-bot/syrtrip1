@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:SyrTrip/widgets/custom_appbar.dart';
 import 'package:SyrTrip/widgets/main_drawer.dart';
@@ -135,9 +133,9 @@ class _HotelsViewState extends State<HotelsView> {
                                   padding: const EdgeInsets.only(right: 8),
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      context.read<FilterProvider>().selectFilter(
-                                        filter,
-                                      );
+                                      context
+                                          .read<FilterProvider>()
+                                          .selectFilter(filter);
                                     },
                                     icon: CircleAvatar(
                                       radius: 12,
@@ -147,7 +145,9 @@ class _HotelsViewState extends State<HotelsView> {
                                       child: Icon(
                                         Icons.filter_alt,
                                         size: 14,
-                                        color: isSelected ? Colors.black : Colors.white,
+                                        color: isSelected
+                                            ? Colors.black
+                                            : Colors.white,
                                       ),
                                     ),
                                     label: Text(
@@ -203,7 +203,9 @@ class _HotelsViewState extends State<HotelsView> {
                                   id: h.id,
                                   title: h.name,
                                   subtitle: h.location,
-                                  imagePath: h.images.isNotEmpty ? h.images.first : '',
+                                  imagePath: h.images.isNotEmpty
+                                      ? h.images.first
+                                      : '',
                                   rating: h.rating,
                                   type: "hotel",
                                   price: h.pricePerNight,

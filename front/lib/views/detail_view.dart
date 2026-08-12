@@ -20,6 +20,7 @@ class DetailArguments {
   final DetailType type;
   final String? phoneNumber;
   final String? locationUrl;
+  final String? vehicleType;
   final double? pricePerNight;
 
   DetailArguments({
@@ -31,6 +32,7 @@ class DetailArguments {
     required this.type,
     this.phoneNumber,
     this.locationUrl,
+    this.vehicleType,
     this.pricePerNight,
   });
 }
@@ -216,6 +218,113 @@ class _DetailViewState extends State<DetailView> {
                     ],
                   ),
                   const SizedBox(height: 16),
+
+                  // تفاصيل خاصة بالسيارات (نوع السيارة، السعر باليوم)
+                  if (args.type == DetailType.transport) ...[
+                    if (args.vehicleType != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.directions_car,
+                              color: Colors.black54,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              args.vehicleType!,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    if (args.pricePerNight != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: Text(
+                          '${args.pricePerNight!.toStringAsFixed(0)} ل.س / يوم',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ),
+
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.event_available),
+                      label: const Text('احجز السيارة'),
+                      onPressed: () async {
+                        final picked = await showDateRangePicker(
+                          context: context,
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime.now().add(
+                            const Duration(days: 365),
+                          ),
+                        );
+
+                        if (picked != null) {
+                          final days =
+                              picked.end.difference(picked.start).inDays + 1;
+                          final totalPrice = (args.pricePerNight ?? 0) * days;
+
+                          final booking = {
+                            "id": args.id,
+                            "title": args.name,
+                            "type": args.type.name,
+                            "startDate":
+                                '${picked.start.day}/${picked.start.month}/${picked.start.year}',
+                            "endDate":
+                                '${picked.end.day}/${picked.end.month}/${picked.end.year}',
+                            "days": days,
+                            "price": totalPrice,
+                            "image": args.images.isNotEmpty
+                                ? args.images.first
+                                : "",
+                          };
+
+                          await BookingsController.addBooking(booking);
+
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => PayPalPaymentView(
+                                itemName: args.name,
+                                itemType: 'استئجار سيارة',
+                                amount: '${totalPrice.toStringAsFixed(1)} ل.س',
+                              ),
+                            ),
+                          );
+
+                          if (result == true && mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('تم الحجز والدفع بنجاح ✅'),
+                              ),
+                            );
+                          } else if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('تم حفظ الحجز (دون دفع) ✅'),
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF00C2FF),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                   if (args.type == DetailType.hotel ||
                       args.type == DetailType.restaurant) ...[
                     ElevatedButton.icon(

@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'controllers/auth_controller.dart';
 
 import 'views/splash_view.dart';
-import 'views/login_view.dart';
+// removed unused import: views/login_view.dart
 import 'views/hotels_view.dart';
 import 'views/attractions_view.dart';
 import 'views/restaurants_view.dart';
@@ -38,10 +38,7 @@ void main() async {
 class SyrTripApp extends StatelessWidget {
   final bool isLoggedIn;
 
-  const SyrTripApp({
-    super.key,
-    required this.isLoggedIn,
-  });
+  const SyrTripApp({super.key, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {

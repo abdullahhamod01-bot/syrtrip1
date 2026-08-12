@@ -21,8 +21,8 @@ class BottomNavBar extends StatelessWidget {
       onTap: onTap,
       items: const [
         BottomNavigationBarItem(
-          icon: Icon(Icons.directions_bus),
-          label: "المواصلات",
+          icon: Icon(Icons.car_crash),
+          label: "اجار سيارة",
         ),
         BottomNavigationBarItem(icon: Icon(Icons.hotel), label: "الفنادق"),
         BottomNavigationBarItem(

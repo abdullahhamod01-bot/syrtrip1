@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import '../controllers/auth_controller.dart';
 import 'login_view.dart';
 import 'home_view.dart';
 

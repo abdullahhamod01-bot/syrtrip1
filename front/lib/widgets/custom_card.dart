@@ -148,12 +148,19 @@ class CustomCard extends StatelessWidget {
                           ],
                         ),
 
-                        // ⭐ السعر (فقط للفنادق)
-                        if (type == "hotel" && price != null)
+                        // ⭐ السعر (فنادق + مواصلات/سيارات)
+                        if (price != null &&
+                            (type == "hotel" ||
+                                type == "transport" ||
+                                type == "car"))
                           Padding(
                             padding: const EdgeInsets.only(top: 4),
                             child: Text(
-                              "${price!.toStringAsFixed(0)} ل.س / ليلة",
+                              type == "hotel"
+                                  ? "${price!.toStringAsFixed(0)} ل.س / ليلة"
+                                  : type == "car" || type == "transport"
+                                  ? "${price!.toStringAsFixed(0)} ل.س / يوم"
+                                  : "${price!.toStringAsFixed(0)} ل.س",
                               style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
