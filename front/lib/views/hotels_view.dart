@@ -107,7 +107,8 @@ class _HotelsViewState extends State<HotelsView> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedFilter = context.watch<FilterProvider>().selectedFilter;
+    // subscribe to filter provider to trigger rebuilds when it changes
+    context.watch<FilterProvider>().selectedFilter;
 
     final filteredHotels = hotels.where((h) {
       final matchesSearch =
