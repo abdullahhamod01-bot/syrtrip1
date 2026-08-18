@@ -90,7 +90,7 @@ class _MainDrawerState extends State<MainDrawer> {
                   ),
 
                   _drawerItem(
-                    icon: Icons.favorite,
+                    icon: Icons.map,
                     title: " الخريطة",
                     onTap: () {
                       Navigator.pop(context);
