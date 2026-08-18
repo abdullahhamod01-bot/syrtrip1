@@ -39,6 +39,19 @@ class DetailArguments {
 
 class DetailView extends StatefulWidget {
   static const routeName = '/details';
+
+  static bool isRemoteImage(String path) {
+    final trimmed = path.trim();
+    return trimmed.startsWith('http://') || trimmed.startsWith('https://');
+  }
+
+  static ImageProvider resolveImageProvider(String path) {
+    if (isRemoteImage(path)) {
+      return NetworkImage(path);
+    }
+    return AssetImage(path);
+  }
+
   const DetailView({super.key});
 
   @override
@@ -112,6 +125,25 @@ class _DetailViewState extends State<DetailView> {
     }
   }
 
+  void _goToImage(int index) {
+    if (index < 0 || index >= _safeImages.length) return;
+    setState(() => currentImageIndex = index);
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  List<String> get _safeImages {
+    final input =
+        ModalRoute.of(context)?.settings.arguments as DetailArguments?;
+    if (input == null || input.images.isEmpty) {
+      return const ['assets/images/bridge.WebP'];
+    }
+    return input.images.where((image) => image.trim().isNotEmpty).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as DetailArguments;
@@ -130,16 +162,35 @@ class _DetailViewState extends State<DetailView> {
                 children: [
                   PageView.builder(
                     controller: _pageController,
-                    itemCount: args.images.length,
+                    itemCount: _safeImages.length,
                     onPageChanged: (index) =>
                         setState(() => currentImageIndex = index),
-                    itemBuilder: (context, index) => Image.asset(
-                      args.images[index],
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
+                    itemBuilder: (context, index) {
+                      final imagePath = _safeImages[index];
+                      final imageProvider = DetailView.resolveImageProvider(
+                        imagePath,
+                      );
+
+                      return Image(
+                        image: imageProvider,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey.shade200,
+                            child: const Center(
+                              child: Icon(
+                                Icons.image_not_supported_outlined,
+                                size: 52,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
                   ),
-                  if (args.images.length > 1) ...[
+                  if (_safeImages.length > 1) ...[
                     Positioned(
                       left: 8,
                       top: 90,
@@ -149,14 +200,7 @@ class _DetailViewState extends State<DetailView> {
                           color: Colors.white,
                         ),
                         onPressed: currentImageIndex > 0
-                            ? () {
-                                currentImageIndex--;
-                                _pageController.animateToPage(
-                                  currentImageIndex,
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeInOut,
-                                );
-                              }
+                            ? () => _goToImage(currentImageIndex - 1)
                             : null,
                       ),
                     ),
@@ -168,16 +212,32 @@ class _DetailViewState extends State<DetailView> {
                           Icons.arrow_forward_ios,
                           color: Colors.white,
                         ),
-                        onPressed: currentImageIndex < args.images.length - 1
-                            ? () {
-                                currentImageIndex++;
-                                _pageController.animateToPage(
-                                  currentImageIndex,
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeInOut,
-                                );
-                              }
+                        onPressed: currentImageIndex < _safeImages.length - 1
+                            ? () => _goToImage(currentImageIndex + 1)
                             : null,
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 8,
+                      right: 0,
+                      left: 0,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          _safeImages.length,
+                          (index) => AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            width: currentImageIndex == index ? 12 : 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: currentImageIndex == index
+                                  ? Colors.white
+                                  : Colors.white.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ],
