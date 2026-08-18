@@ -5,7 +5,7 @@ import 'package:SyrTrip/controllers/bookings_controller.dart'
 import 'package:url_launcher/url_launcher.dart';
 import '../widgets/custom_appbar.dart';
 import '../widgets/main_drawer.dart';
-import '../providers/comments_provider.dart';
+import '../controllers/reviews_controller.dart';
 import '../controllers/favorites_controller.dart';
 import 'paypal_payment_view.dart';
 
@@ -51,6 +51,8 @@ class _DetailViewState extends State<DetailView> {
   int selectedStars = 0;
   int currentImageIndex = 0;
   bool isFavorite = false;
+  bool _isLoadingReviews = true;
+  List<ReviewItem> _reviews = [];
 
   bool get isCommentValid =>
       selectedStars > 0 && _controller.text.trim().isNotEmpty;
@@ -62,14 +64,57 @@ class _DetailViewState extends State<DetailView> {
       final args =
           ModalRoute.of(context)!.settings.arguments as DetailArguments;
       final fav = await FavoritesController.isFavorite(args.id);
-      if (mounted) setState(() => isFavorite = fav);
+      if (mounted) {
+        setState(() => isFavorite = fav);
+        _loadReviews(args);
+      }
     });
+  }
+
+  Future<void> _loadReviews(DetailArguments args) async {
+    setState(() => _isLoadingReviews = true);
+    final reviews = await ReviewsController.getReviews(
+      type: args.type,
+      itemId: args.id,
+    );
+
+    if (mounted) {
+      setState(() {
+        _reviews = reviews;
+        _isLoadingReviews = false;
+      });
+    }
+  }
+
+  Future<void> _submitReview(DetailArguments args) async {
+    if (!isCommentValid) return;
+
+    final result = await ReviewsController.submitReview(
+      type: args.type,
+      itemId: args.id,
+      rating: selectedStars,
+      comment: _controller.text.trim(),
+    );
+
+    if (!mounted) return;
+
+    if (result['success'] == true) {
+      _controller.clear();
+      setState(() => selectedStars = 0);
+      await _loadReviews(args);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تمت إضافة التعليق بنجاح ✅')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result['message'] ?? 'فشل إضافة التعليق')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as DetailArguments;
-    final comments = context.watch<CommentsProvider>().getComments(args.id);
 
     return Scaffold(
       drawer: const MainDrawer(),
@@ -612,20 +657,7 @@ class _DetailViewState extends State<DetailView> {
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.send),
                         onPressed: isCommentValid
-                            ? () {
-                                final comment = Comment(
-                                  userName: "user",
-                                  userImage: "assets/yong.png",
-                                  text: _controller.text.trim(),
-                                  stars: selectedStars,
-                                );
-                                context.read<CommentsProvider>().addComment(
-                                  args.id,
-                                  comment,
-                                );
-                                _controller.clear();
-                                setState(() => selectedStars = 0);
-                              }
+                            ? () => _submitReview(args)
                             : null,
                       ),
                     ),
@@ -637,52 +669,48 @@ class _DetailViewState extends State<DetailView> {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  ...comments.asMap().entries.map((entry) {
-                    final i = entry.key;
-                    final c = entry.value;
-                    return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 6),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: AssetImage(c.userImage),
-                        ),
-                        title: Text(c.userName),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: List.generate(
-                                5,
-                                (j) => Icon(
-                                  Icons.star,
-                                  size: 14,
-                                  color: j < c.stars
-                                      ? Colors.amber
-                                      : Colors.grey[300],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(c.text),
-                          ],
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            context.read<CommentsProvider>().deleteComment(
-                              args.id,
-                              i,
-                            );
-                          },
-                        ),
-                      ),
-                    );
-                  }),
-                  if (comments.isEmpty)
+                  if (_isLoadingReviews)
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else if (_reviews.isEmpty)
                     const Text(
                       "لا توجد تعليقات بعد.",
                       style: TextStyle(color: Colors.grey),
-                    ),
+                    )
+                  else
+                    ..._reviews.map((review) {
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 6),
+                        child: ListTile(
+                          leading: const CircleAvatar(
+                            backgroundColor: Colors.green,
+                            child: Icon(Icons.person, color: Colors.white),
+                          ),
+                          title: Text(review.userName),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: List.generate(
+                                  5,
+                                  (j) => Icon(
+                                    Icons.star,
+                                    size: 14,
+                                    color: j < review.rating
+                                        ? Colors.amber
+                                        : Colors.grey[300],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(review.comment),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
                 ],
               ),
             ),
