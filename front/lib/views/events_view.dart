@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../../providers/app_provider.dart';
 import '../controllers/favorites_controller.dart';
@@ -12,6 +14,8 @@ class EventsView extends StatefulWidget {
 
 class _EventsViewState extends State<EventsView> {
   List<String> favs = [];
+  List<Map<String, dynamic>> _events = [];
+  bool _isLoading = true;
   String _searchQuery = '';
   String _selectedCity = 'الكل';
   String _selectedCategory = 'all';
@@ -27,9 +31,8 @@ class _EventsViewState extends State<EventsView> {
     'تدمر',
   ];
 
-  // ===== Demo Events Data =====n
   // ===== Demo Events Data =====
-  final List<Map<String, dynamic>> _events = [
+  final List<Map<String, dynamic>> _demoEvents = [
     {
       'id': '1',
       'titleAr': 'مهرجان دمشق السينمائي',
@@ -292,12 +295,147 @@ class _EventsViewState extends State<EventsView> {
   @override
   void initState() {
     super.initState();
+    _events = List<Map<String, dynamic>>.from(_demoEvents);
     _loadFavorites();
+    _loadEvents();
   }
 
   Future<void> _loadFavorites() async {
     favs = await FavoritesController.loadFavorites();
     if (mounted) setState(() {});
+  }
+
+  Future<void> _loadEvents() async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://syr-trip-backend.vercel.app/api/events'),
+      );
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final List<dynamic> data = decoded['events'] ?? [];
+        final loadedEvents = data
+            .map<Map<String, dynamic>>((event) => _normalizeEvent(event))
+            .toList();
+
+        if (mounted) {
+          setState(() {
+            _events = loadedEvents.isNotEmpty ? loadedEvents : _demoEvents;
+            _isLoading = false;
+          });
+        }
+        return;
+      }
+    } catch (_) {
+      // تجاهل الخطأ وسيبقى العرض على البيانات الاحتياطية
+    }
+
+    if (mounted) {
+      setState(() {
+        _events = List<Map<String, dynamic>>.from(_demoEvents);
+        _isLoading = false;
+      });
+    }
+  }
+
+  Map<String, dynamic> _normalizeEvent(Map<String, dynamic> event) {
+    final rawName = (event['name'] ?? event['titleAr'] ?? 'فعالية').toString();
+    final rawDescription =
+        (event['description'] ?? event['descriptionAr'] ?? 'لا توجد تفاصيل')
+            .toString();
+    final rawLocation = (event['location'] ?? 'غير محدد').toString();
+    final rawDate = (event['startDate'] ?? event['date'] ?? '').toString();
+    final rawCategory = (event['type'] ?? event['category'] ?? 'culture')
+        .toString();
+    final rawImages = event['images'];
+    final imageUrl = rawImages is List && rawImages.isNotEmpty
+        ? rawImages.first.toString()
+        : 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=800';
+
+    final city = _extractCity(rawLocation);
+    final type = _mapCategory(rawCategory);
+    final dateValue = _parseDate(rawDate);
+    final priceValue = event['price'];
+
+    return {
+      'id': event['id'] ?? rawName,
+      'titleAr': rawName,
+      'titleEn': rawName,
+      'descriptionAr': rawDescription,
+      'descriptionEn': rawDescription,
+      'city': city,
+      'cityEn': _cityToEnglish(city),
+      'date': dateValue,
+      'time': (event['time'] ?? '00:00').toString(),
+      'category': type,
+      'image': imageUrl,
+      'location': rawLocation,
+      'locationEn': rawLocation,
+      'price': _formatPrice(priceValue),
+      'priceEn': _formatPrice(priceValue),
+    };
+  }
+
+  String _extractCity(String location) {
+    if (location.contains('-')) {
+      return location.split('-').first.trim();
+    }
+    return location.trim().isEmpty ? 'دمشق' : location.trim();
+  }
+
+  String _mapCategory(String value) {
+    final normalized = value.toLowerCase();
+    if (normalized.contains('موسي') || normalized.contains('music')) {
+      return 'music';
+    }
+    if (normalized.contains('رياض') || normalized.contains('sport')) {
+      return 'sports';
+    }
+    if (normalized.contains('طعام') || normalized.contains('food')) {
+      return 'food';
+    }
+    if (normalized.contains('تراث') || normalized.contains('heritage')) {
+      return 'heritage';
+    }
+    return 'culture';
+  }
+
+  String _cityToEnglish(String city) {
+    switch (city) {
+      case 'دمشق':
+        return 'Damascus';
+      case 'حلب':
+        return 'Aleppo';
+      case 'حماه':
+        return 'Hama';
+      case 'اللاذقية':
+        return 'Latakia';
+      case 'حمص':
+        return 'Homs';
+      case 'طرطوس':
+        return 'Tartus';
+      case 'السويداء':
+        return 'Sweida';
+      case 'تدمر':
+        return 'Palmyra';
+      default:
+        return city;
+    }
+  }
+
+  String _parseDate(String rawDate) {
+    if (rawDate.isEmpty) return 'غير محدد';
+    final parsed = DateTime.tryParse(rawDate);
+    if (parsed == null) return rawDate;
+    return '${parsed.year}-${parsed.month.toString().padLeft(2, '0')}-${parsed.day.toString().padLeft(2, '0')}';
+  }
+
+  String _formatPrice(dynamic value) {
+    if (value == null) return 'مجاني';
+    final number = num.tryParse(value.toString());
+    if (number == null) return value.toString();
+    if (number == 0) return 'مجاني';
+    return '${number.toInt()} ل.س';
   }
 
   @override
@@ -323,129 +461,136 @@ class _EventsViewState extends State<EventsView> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // ===== Search + City Filter =====
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
               children: [
-                Expanded(
-                  flex: 2,
-                  child: TextField(
-                    onChanged: (value) => setState(() => _searchQuery = value),
-                    decoration: InputDecoration(
-                      hintText: isAr
-                          ? 'ابحث عن فعالية...'
-                          : 'Search for an event...',
-                      hintStyle: const TextStyle(fontFamily: 'Tajawal'),
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: _searchQuery.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () =>
-                                  setState(() => _searchQuery = ''),
-                            )
-                          : null,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                // ===== Search + City Filter =====
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: TextField(
+                          onChanged: (value) =>
+                              setState(() => _searchQuery = value),
+                          decoration: InputDecoration(
+                            hintText: isAr
+                                ? 'ابحث عن فعالية...'
+                                : 'Search for an event...',
+                            hintStyle: const TextStyle(fontFamily: 'Tajawal'),
+                            prefixIcon: const Icon(Icons.search),
+                            suffixIcon: _searchQuery.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () =>
+                                        setState(() => _searchQuery = ''),
+                                  )
+                                : null,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 1,
+                        child: DropdownButtonFormField<String>(
+                          value: _selectedCity,
+                          items: _cities
+                              .map(
+                                (city) => DropdownMenuItem(
+                                  value: city,
+                                  child: Text(city),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() => _selectedCity = value);
+                            }
+                          },
+                          decoration: InputDecoration(
+                            labelText: isAr ? 'المدينة' : 'City',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 1,
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedCity,
-                    items: _cities
-                        .map(
-                          (city) =>
-                              DropdownMenuItem(value: city, child: Text(city)),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() => _selectedCity = value);
-                      }
+
+                // ===== Categories =====
+                Container(
+                  height: 50,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _categories.length,
+                    itemBuilder: (context, index) {
+                      final cat = _categories[index];
+                      final isSelected = _selectedCategory == cat['key'];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: ChoiceChip(
+                          label: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                cat['icon'],
+                                size: 16,
+                                color: isSelected
+                                    ? Colors.white
+                                    : Colors.grey[600],
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                isAr ? cat['labelAr'] : cat['labelEn'],
+                                style: TextStyle(
+                                  color: isSelected ? Colors.white : null,
+                                  fontFamily: 'Tajawal',
+                                ),
+                              ),
+                            ],
+                          ),
+                          selected: isSelected,
+                          selectedColor: const Color(0xFF1B5E20),
+                          backgroundColor: isDark
+                              ? Colors.grey[800]
+                              : Colors.grey[200],
+                          onSelected: (selected) {
+                            if (selected)
+                              setState(() => _selectedCategory = cat['key']);
+                          },
+                        ),
+                      );
                     },
-                    decoration: InputDecoration(
-                      labelText: isAr ? 'المدينة' : 'City',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
                   ),
+                ),
+
+                const SizedBox(height: 8),
+
+                // ===== Events List =====
+                Expanded(
+                  child: filteredEvents.isEmpty
+                      ? _buildEmptyState(isAr)
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          itemCount: filteredEvents.length,
+                          itemBuilder: (context, index) => _buildEventCard(
+                            context,
+                            filteredEvents[index],
+                            isAr,
+                            isDark,
+                          ),
+                        ),
                 ),
               ],
             ),
-          ),
-
-          // ===== Categories =====
-          Container(
-            height: 50,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: _categories.length,
-              itemBuilder: (context, index) {
-                final cat = _categories[index];
-                final isSelected = _selectedCategory == cat['key'];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: ChoiceChip(
-                    label: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          cat['icon'],
-                          size: 16,
-                          color: isSelected ? Colors.white : Colors.grey[600],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          isAr ? cat['labelAr'] : cat['labelEn'],
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : null,
-                            fontFamily: 'Tajawal',
-                          ),
-                        ),
-                      ],
-                    ),
-                    selected: isSelected,
-                    selectedColor: const Color(0xFF1B5E20),
-                    backgroundColor: isDark
-                        ? Colors.grey[800]
-                        : Colors.grey[200],
-                    onSelected: (selected) {
-                      if (selected)
-                        setState(() => _selectedCategory = cat['key']);
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          // ===== Events List =====
-          Expanded(
-            child: filteredEvents.isEmpty
-                ? _buildEmptyState(isAr)
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    itemCount: filteredEvents.length,
-                    itemBuilder: (context, index) => _buildEventCard(
-                      context,
-                      filteredEvents[index],
-                      isAr,
-                      isDark,
-                    ),
-                  ),
-          ),
-        ],
-      ),
     );
   }
 
