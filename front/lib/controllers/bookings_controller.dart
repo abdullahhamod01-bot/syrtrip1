@@ -4,9 +4,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_controller.dart';
 
 class BookingsController {
-  static const String key = 'bookings';
+  static const String keyPrefix = 'bookings';
   static const String baseUrl =
       'https://syr-trip-backend.vercel.app/api/bookings';
+
+  static Future<String> _userKey() async {
+    final userId = await AuthController.getUserId();
+    return userId == null || userId.isEmpty
+        ? '${keyPrefix}_guest'
+        : '${keyPrefix}_$userId';
+  }
 
   static String normalizeStatus(String? status) {
     final value = (status ?? '').toString().trim().toLowerCase();
@@ -54,7 +61,7 @@ class BookingsController {
 
   static Future<List<Map<String, dynamic>>> _readLocalBookings() async {
     final prefs = await SharedPreferences.getInstance();
-    final data = prefs.getString(key);
+    final data = prefs.getString(await _userKey());
     if (data == null || data.isEmpty) return [];
 
     try {
@@ -75,7 +82,7 @@ class BookingsController {
     List<Map<String, dynamic>> list,
   ) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(key, jsonEncode(list));
+    await prefs.setString(await _userKey(), jsonEncode(list));
   }
 
   static Future<List<Map<String, dynamic>>> getBookings() async {
@@ -204,6 +211,6 @@ class BookingsController {
 
   static Future<void> clear() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(key);
+    await prefs.remove(await _userKey());
   }
 }

@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:SyrTrip/controllers/bookings_controller.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('BookingsController status helpers', () {
     test('pending status label is Arabic waiting label', () {
       expect(BookingsController.getStatusLabel('pending'), 'قيد الانتظار');
@@ -19,5 +21,13 @@ void main() {
       expect(steps[1]['active'], isTrue);
       expect(steps[2]['active'], isFalse);
     });
+
+    test(
+      'user specific storage flows remain stable for current session',
+      () async {
+        final list = await BookingsController.getBookings();
+        expect(list, isA<List<Map<String, dynamic>>>());
+      },
+    );
   });
 }

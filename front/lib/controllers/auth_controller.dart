@@ -113,6 +113,43 @@ class AuthController {
     return prefs.getString('user_name');
   }
 
+  static Future<String?> getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedUserId = prefs.getString('user_id');
+    if (savedUserId != null && savedUserId.isNotEmpty) {
+      return savedUserId;
+    }
+
+    final token = await getToken();
+    if (token == null || token.isEmpty) return null;
+
+    try {
+      final res = await http.get(
+        Uri.parse('https://syr-trip-backend.vercel.app/api/users/me'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        final userId =
+            data['id']?.toString() ?? data['user']?['id']?.toString();
+        if (userId != null && userId.isNotEmpty) {
+          await prefs.setString('user_id', userId);
+          return userId;
+        }
+      }
+    } catch (_) {}
+
+    return null;
+  }
+
+  static Future<void> clearUserSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    await prefs.remove('user_name');
+    await prefs.remove('user_id');
+  }
+
   // ═══════════════════════════════════════════════════════════════
   // ✅ التحقق من تسجيل الدخول
   // ═══════════════════════════════════════════════════════════════
@@ -125,9 +162,7 @@ class AuthController {
   // ✅ تسجيل الخروج
   // ═══════════════════════════════════════════════════════════════
   Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
-    await prefs.remove('user_name');
+    await clearUserSession();
     errorMessage = null;
     print("✅ Logged out");
   }
