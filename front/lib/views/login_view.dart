@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../controllers/auth_controller.dart';
+import '../services/push_notifications_service.dart';
 import '../widgets/custom_button.dart';
 import 'home_view.dart';
 import 'signup_view.dart';
@@ -29,10 +30,7 @@ class _LoginViewState extends State<LoginView> {
 
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 20,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
 
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -41,19 +39,14 @@ class _LoginViewState extends State<LoginView> {
               Align(
                 alignment: Alignment.topLeft,
                 child: PopupMenuButton<String>(
-                  icon: const Icon(
-                    Icons.language,
-                    color: Color(0xFF2E7D63),
-                  ),
+                  icon: const Icon(Icons.language, color: Color(0xFF2E7D63)),
                   onSelected: (value) {
                     setState(() {
                       selectedLanguage = value;
                     });
 
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("تم تغيير اللغة إلى $value"),
-                      ),
+                      SnackBar(content: Text("تم تغيير اللغة إلى $value")),
                     );
                   },
                   itemBuilder: (context) => [
@@ -95,10 +88,7 @@ class _LoginViewState extends State<LoginView> {
                     ],
                   ),
 
-                  child: Image.asset(
-                    "assets/logo.png",
-                    fit: BoxFit.contain,
-                  ),
+                  child: Image.asset("assets/logo.png", fit: BoxFit.contain),
                 ),
               ),
 
@@ -119,10 +109,7 @@ class _LoginViewState extends State<LoginView> {
               const Text(
                 "سجل الدخول لاستكشاف سوريا",
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.grey,
-                ),
+                style: TextStyle(fontSize: 15, color: Colors.grey),
               ),
 
               const SizedBox(height: 35),
@@ -166,9 +153,7 @@ class _LoginViewState extends State<LoginView> {
 
                   suffixIcon: IconButton(
                     icon: Icon(
-                      obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
+                      obscurePassword ? Icons.visibility_off : Icons.visibility,
                     ),
                     onPressed: () {
                       setState(() {
@@ -207,9 +192,7 @@ class _LoginViewState extends State<LoginView> {
 
               /// login button
               isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
+                  ? const Center(child: CircularProgressIndicator())
                   : CustomButton(
                       text: "تسجيل الدخول",
 
@@ -233,11 +216,10 @@ class _LoginViewState extends State<LoginView> {
                         });
 
                         if (success && mounted) {
+                          await PushNotificationsService.initializeForUser();
                           Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(
-                              builder: (_) => const HomeView(),
-                            ),
+                            MaterialPageRoute(builder: (_) => const HomeView()),
                           );
                         } else {
                           setState(() {
@@ -268,9 +250,7 @@ class _LoginViewState extends State<LoginView> {
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 55),
 
-                  side: const BorderSide(
-                    color: Color(0xFF2E7D63),
-                  ),
+                  side: const BorderSide(color: Color(0xFF2E7D63)),
 
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18),
@@ -280,16 +260,12 @@ class _LoginViewState extends State<LoginView> {
                 onPressed: () {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => const HomeView(),
-                    ),
+                    MaterialPageRoute(builder: (_) => const HomeView()),
                   );
                 },
               ),
 
               const SizedBox(height: 16),
-
-              
 
               const SizedBox(height: 20),
 
@@ -306,9 +282,7 @@ class _LoginViewState extends State<LoginView> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => const SignupView(),
-                        ),
+                        MaterialPageRoute(builder: (_) => const SignupView()),
                       );
                     },
 

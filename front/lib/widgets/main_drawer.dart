@@ -78,8 +78,6 @@ class _MainDrawerState extends State<MainDrawer> {
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 children: [
-                 
-
                   _drawerItem(
                     icon: Icons.currency_exchange,
                     title: "صرف العملة",
@@ -104,6 +102,15 @@ class _MainDrawerState extends State<MainDrawer> {
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.pushNamed(context, '/events');
+                    },
+                  ),
+
+                  _drawerItem(
+                    icon: Icons.notifications,
+                    title: "الإشعارات",
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.pushNamed(context, '/notifications');
                     },
                   ),
 
@@ -165,17 +172,13 @@ class _MainDrawerState extends State<MainDrawer> {
                                 const SizedBox(height: 20),
 
                                 _langTile("العربية", Icons.language, () {
-                                  context.read<AppProvider>().setLanguage(
-                                    'ar',
-                                  );
+                                  context.read<AppProvider>().setLanguage('ar');
 
                                   Navigator.pop(context);
                                 }),
 
                                 _langTile("English", Icons.language, () {
-                                  context.read<AppProvider>().setLanguage(
-                                    'en',
-                                  );
+                                  context.read<AppProvider>().setLanguage('en');
 
                                   Navigator.pop(context);
                                 }),

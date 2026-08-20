@@ -61,25 +61,23 @@ class NotificationsController {
     } catch (_) {}
   }
 
-  static Future<void> markAllAsRead({String? notificationId}) async {
+  static Future<bool> markAsRead(String notificationId) async {
     final token = await AuthController.getToken();
-    if (token == null || token.isEmpty) return;
+    if (token == null || token.isEmpty || notificationId.trim().isEmpty) {
+      return false;
+    }
 
     try {
-      final payload = <String, dynamic>{};
-      if (notificationId != null && notificationId.isNotEmpty) {
-        payload['notificationId'] = notificationId;
-        payload['id'] = notificationId;
-      }
-
-      await http.post(
-        Uri.parse('$baseUrl/read'),
+      final response = await http.patch(
+        Uri.parse('$baseUrl/${Uri.encodeComponent(notificationId)}/read'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode(payload),
       );
+      return response.statusCode >= 200 && response.statusCode < 300;
     } catch (_) {}
+
+    return false;
   }
 }
