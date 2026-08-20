@@ -135,6 +135,58 @@ class _DetailViewState extends State<DetailView> {
     );
   }
 
+  Future<void> _bookByDateRange(
+    DetailArguments args, {
+    required String itemType,
+  }) async {
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+
+    if (picked == null) return;
+
+    final days = picked.end.difference(picked.start).inDays + 1;
+    final totalPrice = (args.pricePerNight ?? 0) * days;
+    final booking = {
+      "id": args.id,
+      "title": args.name,
+      "type": args.type.name,
+      "startDate":
+          '${picked.start.day}/${picked.start.month}/${picked.start.year}',
+      "endDate": '${picked.end.day}/${picked.end.month}/${picked.end.year}',
+      "days": days,
+      "price": totalPrice,
+      "image": args.images.isNotEmpty ? args.images.first : "",
+    };
+
+    await BookingsController.addBooking(booking);
+
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PayPalPaymentView(
+          itemName: args.name,
+          itemType: itemType,
+          amount: '${totalPrice.toStringAsFixed(1)} ل.س',
+        ),
+      ),
+    );
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          result == true
+              ? 'تم الحجز والدفع بنجاح ✅'
+              : 'تم حفظ الحجز (دون دفع) ✅',
+        ),
+      ),
+    );
+  }
+
   List<String> get _safeImages {
     final input =
         ModalRoute.of(context)?.settings.arguments as DetailArguments?;
@@ -362,63 +414,8 @@ class _DetailViewState extends State<DetailView> {
                     ElevatedButton.icon(
                       icon: const Icon(Icons.event_available),
                       label: const Text('احجز السيارة'),
-                      onPressed: () async {
-                        final picked = await showDateRangePicker(
-                          context: context,
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime.now().add(
-                            const Duration(days: 365),
-                          ),
-                        );
-
-                        if (picked != null) {
-                          final days =
-                              picked.end.difference(picked.start).inDays + 1;
-                          final totalPrice = (args.pricePerNight ?? 0) * days;
-
-                          final booking = {
-                            "id": args.id,
-                            "title": args.name,
-                            "type": args.type.name,
-                            "startDate":
-                                '${picked.start.day}/${picked.start.month}/${picked.start.year}',
-                            "endDate":
-                                '${picked.end.day}/${picked.end.month}/${picked.end.year}',
-                            "days": days,
-                            "price": totalPrice,
-                            "image": args.images.isNotEmpty
-                                ? args.images.first
-                                : "",
-                          };
-
-                          await BookingsController.addBooking(booking);
-
-                          final result = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => PayPalPaymentView(
-                                itemName: args.name,
-                                itemType: 'استئجار سيارة',
-                                amount: '${totalPrice.toStringAsFixed(1)} ل.س',
-                              ),
-                            ),
-                          );
-
-                          if (result == true && mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('تم الحجز والدفع بنجاح ✅'),
-                              ),
-                            );
-                          } else if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('تم حفظ الحجز (دون دفع) ✅'),
-                              ),
-                            );
-                          }
-                        }
-                      },
+                      onPressed: () =>
+                          _bookByDateRange(args, itemType: 'استئجار سيارة'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF00C2FF),
                         foregroundColor: Colors.white,
@@ -430,8 +427,24 @@ class _DetailViewState extends State<DetailView> {
                     ),
                     const SizedBox(height: 12),
                   ],
-                  if (args.type == DetailType.hotel ||
-                      args.type == DetailType.restaurant) ...[
+                  if (args.type == DetailType.hotel) ...[
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.event_available),
+                      label: const Text('احجز غرفة'),
+                      onPressed: () =>
+                          _bookByDateRange(args, itemType: 'غرفة الفندق'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF00C2FF),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  if (args.type == DetailType.restaurant) ...[
                     ElevatedButton.icon(
                       onPressed: () {
                         int selectedCount = args.type == DetailType.hotel
