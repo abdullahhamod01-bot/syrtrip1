@@ -682,21 +682,22 @@ class _DetailViewState extends State<DetailView> {
                         ),
                       ),
                     ),
+                  ],
+                  if (args.locationUrl != null) ...[
                     const SizedBox(height: 12),
-                    if (args.locationUrl != null)
-                      ElevatedButton.icon(
-                        onPressed: () => Navigator.pushNamed(context, '/map'),
-                        icon: const Icon(Icons.location_on),
-                        label: const Text("عرض الموقع"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
+                    ElevatedButton.icon(
+                      onPressed: () => Navigator.pushNamed(context, '/map'),
+                      icon: const Icon(Icons.location_on),
+                      label: const Text("عرض الموقع"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
                         ),
                       ),
+                    ),
                   ],
                   const SizedBox(height: 24),
                   const Text(

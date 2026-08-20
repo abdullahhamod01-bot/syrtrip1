@@ -88,6 +88,10 @@ class _TransportViewState extends State<TransportView> {
     if (mounted) setState(() {});
   }
 
+  Future<void> _refreshTransport() async {
+    await _loadData();
+  }
+
   Widget _buildTrailing(String id) {
     final isFav = favs.contains(id);
     return IconButton(
@@ -119,108 +123,115 @@ class _TransportViewState extends State<TransportView> {
       backgroundColor: const Color(0xFFF7FBFF),
       drawer: const MainDrawer(),
       appBar: const CustomAppBar(),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: TextField(
-                    onChanged: (value) => setState(() => _searchQuery = value),
-                    decoration: InputDecoration(
-                      hintText: 'ابحث عن سيارة أو مدينة...',
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: _searchQuery.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () =>
-                                  setState(() => _searchQuery = ''),
-                            )
-                          : null,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 1,
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedCity,
-                    items: _cities
-                        .map(
-                          (city) =>
-                              DropdownMenuItem(value: city, child: Text(city)),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      if (value != null) setState(() => _selectedCity = value);
-                    },
-                    decoration: InputDecoration(
-                      labelText: 'المدينة',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Padding(
+      body: RefreshIndicator(
+        onRefresh: _refreshTransport,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
               padding: const EdgeInsets.all(12),
-              child: GridView.builder(
-                itemCount: filteredTransports.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.74,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                ),
-                itemBuilder: (context, i) {
-                  final t = filteredTransports[i];
-                  return CustomCard(
-                    id: t.id,
-                    title: t.name,
-                    subtitle: t.location,
-                    imagePath: t.images.isNotEmpty
-                        ? t.images.first
-                        : 'assets/images/placeholder.WebP',
-                    rating: t.rating,
-                    price: t.fare,
-                    type: 'car',
-                    trailing: _buildTrailing(t.id),
-                    onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        DetailView.routeName,
-                        arguments: DetailArguments(
-                          id: t.id,
-                          name: t.name,
-                          description: t.description,
-                          images: t.images.isNotEmpty
-                              ? t.images
-                              : ['assets/images/placeholder.WebP'],
-                          rating: t.rating,
-                          type: DetailType.transport,
-                          phoneNumber: null,
-                          locationUrl: t.location,
-                          vehicleType: t.type,
-                          pricePerNight: t.fare,
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      onChanged: (value) =>
+                          setState(() => _searchQuery = value),
+                      decoration: InputDecoration(
+                        hintText: 'ابحث عن سيارة أو مدينة...',
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: _searchQuery.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear),
+                                onPressed: () =>
+                                    setState(() => _searchQuery = ''),
+                              )
+                            : null,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      );
-                    },
-                  );
-                },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 1,
+                    child: DropdownButtonFormField<String>(
+                      value: _selectedCity,
+                      items: _cities
+                          .map(
+                            (city) => DropdownMenuItem(
+                              value: city,
+                              child: Text(city),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null)
+                          setState(() => _selectedCity = value);
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'المدينة',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: GridView.builder(
+                  itemCount: filteredTransports.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.74,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                  ),
+                  itemBuilder: (context, i) {
+                    final t = filteredTransports[i];
+                    return CustomCard(
+                      id: t.id,
+                      title: t.name,
+                      subtitle: t.location,
+                      imagePath: t.images.isNotEmpty
+                          ? t.images.first
+                          : 'assets/images/placeholder.WebP',
+                      rating: t.rating,
+                      price: t.fare,
+                      type: 'car',
+                      trailing: _buildTrailing(t.id),
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          DetailView.routeName,
+                          arguments: DetailArguments(
+                            id: t.id,
+                            name: t.name,
+                            description: t.description,
+                            images: t.images.isNotEmpty
+                                ? t.images
+                                : ['assets/images/placeholder.WebP'],
+                            rating: t.rating,
+                            type: DetailType.transport,
+                            phoneNumber: null,
+                            locationUrl: t.location,
+                            vehicleType: t.type,
+                            pricePerNight: t.fare,
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

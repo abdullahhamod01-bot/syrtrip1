@@ -66,6 +66,12 @@ class _AttractionsViewState extends State<AttractionsView> {
     }
   }
 
+  Future<void> _refreshAttractions() async {
+    favs = await FavoritesController.loadFavorites();
+    attractions = await fetchAttractions();
+    if (mounted) setState(() {});
+  }
+
   Widget _buildTrailing(String id) {
     final isFav = favs.contains(id);
     return IconButton(
@@ -104,103 +110,107 @@ class _AttractionsViewState extends State<AttractionsView> {
       appBar: const CustomAppBar(),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: TextField(
-                          onChanged: (value) =>
-                              setState(() => _searchQuery = value),
-                          decoration: InputDecoration(
-                            hintText: 'ابحث عن معلم أو مدينة...',
-                            prefixIcon: const Icon(Icons.search),
-                            suffixIcon: _searchQuery.isNotEmpty
-                                ? IconButton(
-                                    icon: const Icon(Icons.clear),
-                                    onPressed: () =>
-                                        setState(() => _searchQuery = ''),
-                                  )
-                                : null,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex: 1,
-                        child: DropdownButtonFormField<String>(
-                          value: _selectedCity,
-                          items: _cities
-                              .map(
-                                (city) => DropdownMenuItem(
-                                  value: city,
-                                  child: Text(city),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) {
-                            if (value != null)
-                              setState(() => _selectedCity = value);
-                          },
-                          decoration: InputDecoration(
-                            labelText: 'المدينة',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // category filter removed
-                Expanded(
-                  child: Padding(
+          : RefreshIndicator(
+              onRefresh: _refreshAttractions,
+              child: Column(
+                children: [
+                  Padding(
                     padding: const EdgeInsets.all(12),
-                    child: GridView.builder(
-                      itemCount: filteredAttractions.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.74,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                          ),
-                      itemBuilder: (context, i) {
-                        final p = filteredAttractions[i];
-                        return CustomCard(
-                          id: p.id,
-                          title: p.name,
-                          subtitle: p.location,
-                          imagePath: p.images.first,
-                          rating: p.rating,
-                          trailing: _buildTrailing(p.id),
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              DetailView.routeName,
-                              arguments: DetailArguments(
-                                id: p.id,
-                                name: p.name,
-                                description: p.description,
-                                images: p.images,
-                                rating: p.rating,
-                                type: DetailType.attraction,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: TextField(
+                            onChanged: (value) =>
+                                setState(() => _searchQuery = value),
+                            decoration: InputDecoration(
+                              hintText: 'ابحث عن معلم أو مدينة...',
+                              prefixIcon: const Icon(Icons.search),
+                              suffixIcon: _searchQuery.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(Icons.clear),
+                                      onPressed: () =>
+                                          setState(() => _searchQuery = ''),
+                                    )
+                                  : null,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                            );
-                          },
-                        );
-                      },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 1,
+                          child: DropdownButtonFormField<String>(
+                            value: _selectedCity,
+                            items: _cities
+                                .map(
+                                  (city) => DropdownMenuItem(
+                                    value: city,
+                                    child: Text(city),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              if (value != null)
+                                setState(() => _selectedCity = value);
+                            },
+                            decoration: InputDecoration(
+                              labelText: 'المدينة',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ],
+                  // category filter removed
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: GridView.builder(
+                        itemCount: filteredAttractions.length,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 0.74,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                            ),
+                        itemBuilder: (context, i) {
+                          final p = filteredAttractions[i];
+                          return CustomCard(
+                            id: p.id,
+                            title: p.name,
+                            subtitle: p.location,
+                            imagePath: p.images.first,
+                            rating: p.rating,
+                            trailing: _buildTrailing(p.id),
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                DetailView.routeName,
+                                arguments: DetailArguments(
+                                  id: p.id,
+                                  name: p.name,
+                                  description: p.description,
+                                  images: p.images,
+                                  rating: p.rating,
+                                  type: DetailType.attraction,
+                                  locationUrl: p.location,
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
     );
   }

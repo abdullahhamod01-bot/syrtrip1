@@ -68,6 +68,12 @@ class _RestaurantsViewState extends State<RestaurantsView> {
     }
   }
 
+  Future<void> _refreshRestaurants() async {
+    favs = await FavoritesController.loadFavorites();
+    restaurants = await fetchRestaurants();
+    if (mounted) setState(() {});
+  }
+
   Widget _buildTrailing(String id) {
     final isFav = favs.contains(id);
     return IconButton(
@@ -106,105 +112,108 @@ class _RestaurantsViewState extends State<RestaurantsView> {
       appBar: const CustomAppBar(),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: TextField(
-                          onChanged: (value) =>
-                              setState(() => _searchQuery = value),
-                          decoration: InputDecoration(
-                            hintText: 'ابحث عن مطعم أو مدينة...',
-                            prefixIcon: const Icon(Icons.search),
-                            suffixIcon: _searchQuery.isNotEmpty
-                                ? IconButton(
-                                    icon: const Icon(Icons.clear),
-                                    onPressed: () =>
-                                        setState(() => _searchQuery = ''),
-                                  )
-                                : null,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex: 1,
-                        child: DropdownButtonFormField<String>(
-                          value: _selectedCity,
-                          items: _cities
-                              .map(
-                                (city) => DropdownMenuItem(
-                                  value: city,
-                                  child: Text(city),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) {
-                            if (value != null)
-                              setState(() => _selectedCity = value);
-                          },
-                          decoration: InputDecoration(
-                            labelText: 'المدينة',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // category filter removed
-                Expanded(
-                  child: Padding(
+          : RefreshIndicator(
+              onRefresh: _refreshRestaurants,
+              child: Column(
+                children: [
+                  Padding(
                     padding: const EdgeInsets.all(12),
-                    child: GridView.builder(
-                      itemCount: filteredRestaurants.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.74,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                          ),
-                      itemBuilder: (context, i) {
-                        final r = filteredRestaurants[i];
-                        return CustomCard(
-                          id: r.id,
-                          title: r.name,
-                          subtitle: r.location,
-                          imagePath: r.images.first,
-                          rating: r.rating,
-                          trailing: _buildTrailing(r.id),
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              DetailView.routeName,
-                              arguments: DetailArguments(
-                                id: r.id,
-                                name: r.name,
-                                description: r.description,
-                                images: r.images,
-                                rating: r.rating,
-                                phoneNumber: r.phoneNumber,
-                                locationUrl: r.location,
-                                type: DetailType.restaurant,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: TextField(
+                            onChanged: (value) =>
+                                setState(() => _searchQuery = value),
+                            decoration: InputDecoration(
+                              hintText: 'ابحث عن مطعم أو مدينة...',
+                              prefixIcon: const Icon(Icons.search),
+                              suffixIcon: _searchQuery.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(Icons.clear),
+                                      onPressed: () =>
+                                          setState(() => _searchQuery = ''),
+                                    )
+                                  : null,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                            );
-                          },
-                        );
-                      },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 1,
+                          child: DropdownButtonFormField<String>(
+                            value: _selectedCity,
+                            items: _cities
+                                .map(
+                                  (city) => DropdownMenuItem(
+                                    value: city,
+                                    child: Text(city),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              if (value != null)
+                                setState(() => _selectedCity = value);
+                            },
+                            decoration: InputDecoration(
+                              labelText: 'المدينة',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ],
+                  // category filter removed
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: GridView.builder(
+                        itemCount: filteredRestaurants.length,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 0.74,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                            ),
+                        itemBuilder: (context, i) {
+                          final r = filteredRestaurants[i];
+                          return CustomCard(
+                            id: r.id,
+                            title: r.name,
+                            subtitle: r.location,
+                            imagePath: r.images.first,
+                            rating: r.rating,
+                            trailing: _buildTrailing(r.id),
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                DetailView.routeName,
+                                arguments: DetailArguments(
+                                  id: r.id,
+                                  name: r.name,
+                                  description: r.description,
+                                  images: r.images,
+                                  rating: r.rating,
+                                  phoneNumber: r.phoneNumber,
+                                  locationUrl: r.location,
+                                  type: DetailType.restaurant,
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
     );
   }
