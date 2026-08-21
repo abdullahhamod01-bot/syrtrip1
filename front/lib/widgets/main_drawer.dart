@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../controllers/auth_controller.dart';
+import '../controllers/notifications_controller.dart';
 import '../providers/app_provider.dart';
 import '../views/login_view.dart';
 
@@ -22,6 +23,7 @@ class _MainDrawerState extends State<MainDrawer> {
   void initState() {
     super.initState();
     _loadUserName();
+    NotificationsController.getNotifications();
   }
 
   Future<void> _loadUserName() async {
@@ -111,9 +113,45 @@ class _MainDrawerState extends State<MainDrawer> {
                   _drawerItem(
                     icon: Icons.notifications,
                     title: isArabic ? "الإشعارات" : "Notifications",
+                    leading: ValueListenableBuilder<bool>(
+                      valueListenable:
+                          NotificationsController.hasUnreadNotifications,
+                      builder: (context, hasUnread, _) {
+                        return Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            const Icon(
+                              Icons.notifications,
+                              color: Color(0xFF2E7D63),
+                            ),
+                            if (hasUnread)
+                              Positioned(
+                                top: -2,
+                                right: -2,
+                                child: Container(
+                                  width: 9,
+                                  height: 9,
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.surface,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
                     onTap: () {
                       Navigator.pop(context);
-                      Navigator.pushNamed(context, '/notifications');
+                      Navigator.pushNamed(context, '/notifications').then((_) {
+                        NotificationsController.getNotifications();
+                      });
                     },
                   ),
 
@@ -276,6 +314,7 @@ class _MainDrawerState extends State<MainDrawer> {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    Widget? leading,
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6),
@@ -284,7 +323,7 @@ class _MainDrawerState extends State<MainDrawer> {
         borderRadius: BorderRadius.circular(18),
       ),
       child: ListTile(
-        leading: Icon(icon, color: const Color(0xFF2E7D63)),
+        leading: leading ?? Icon(icon, color: const Color(0xFF2E7D63)),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
         trailing: const Icon(
           Icons.arrow_forward_ios,

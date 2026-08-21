@@ -1,10 +1,19 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'auth_controller.dart';
 
 class NotificationsController {
   static const String baseUrl =
       'https://syr-trip-backend.vercel.app/api/notifications';
+  static final ValueNotifier<bool> hasUnreadNotifications = ValueNotifier(
+    false,
+  );
+
+  static bool _isUnread(Map<String, dynamic> notification) {
+    final value = notification['isRead'] ?? notification['read'];
+    return !(value == true || value?.toString().toLowerCase() == 'true');
+  }
 
   static Future<List<Map<String, dynamic>>> getNotifications() async {
     final token = await AuthController.getToken();
@@ -29,15 +38,18 @@ class NotificationsController {
             [];
 
         if (data is List) {
-          return data
+          final notifications = data
               .map<Map<String, dynamic>>(
                 (item) => Map<String, dynamic>.from(item),
               )
               .toList();
+          hasUnreadNotifications.value = notifications.any(_isUnread);
+          return notifications;
         }
       }
     } catch (_) {}
 
+    hasUnreadNotifications.value = false;
     return [];
   }
 
@@ -75,7 +87,11 @@ class NotificationsController {
           'Authorization': 'Bearer $token',
         },
       );
-      return response.statusCode >= 200 && response.statusCode < 300;
+      final success = response.statusCode >= 200 && response.statusCode < 300;
+      if (success) {
+        await getNotifications();
+      }
+      return success;
     } catch (_) {}
 
     return false;

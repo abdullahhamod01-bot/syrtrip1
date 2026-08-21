@@ -56,6 +56,9 @@ class _NotificationsViewState extends State<NotificationsView> {
       setState(() {
         notifications[index] = {...notification, 'isRead': true};
       });
+      NotificationsController.hasUnreadNotifications.value = notifications.any(
+        (item) => !_isRead(item),
+      );
     }
   }
 
