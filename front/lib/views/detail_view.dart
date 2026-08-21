@@ -151,18 +151,22 @@ class _DetailViewState extends State<DetailView> {
     final days = picked.end.difference(picked.start).inDays + 1;
     final totalPrice = (args.pricePerNight ?? 0) * days;
     final booking = {
-      "id": args.id,
-      "title": args.name,
-      "type": args.type.name,
-      "startDate":
-          '${picked.start.day}/${picked.start.month}/${picked.start.year}',
-      "endDate": '${picked.end.day}/${picked.end.month}/${picked.end.year}',
-      "days": days,
-      "price": totalPrice,
-      "image": args.images.isNotEmpty ? args.images.first : "",
+      'itemType': args.type == DetailType.hotel ? 'HOTEL' : 'CAR',
+      if (args.type == DetailType.hotel) 'hotelId': args.id,
+      if (args.type == DetailType.transport) 'carId': args.id,
+      'startDate': picked.start.toIso8601String(),
+      'endDate': picked.end.toIso8601String(),
     };
 
-    await BookingsController.addBooking(booking);
+    final bookingResult = await BookingsController.addBooking(booking);
+    if (!bookingResult['success']) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(bookingResult['message'].toString())),
+        );
+      }
+      return;
+    }
 
     final result = await Navigator.push(
       context,
@@ -598,24 +602,31 @@ class _DetailViewState extends State<DetailView> {
                                                   '${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}';
                                               final dateStr =
                                                   '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}';
-
-                                              // 🔴 هنا أهم تعديل: حفظ الحجز
                                               final booking = {
-                                                "id": args.id,
-                                                "title": args.name,
-                                                "type": args.type.name,
-                                                "date": dateStr,
-                                                "time": timeStr,
-                                                "count": selectedCount,
-                                                "price": totalPrice,
-                                                "image": args.images.isNotEmpty
-                                                    ? args.images.first
-                                                    : "",
+                                                'itemType': 'RESTAURANT',
+                                                'restaurantId': args.id,
+                                                'bookingTime': timeStr,
                                               };
 
-                                              await BookingsController.addBooking(
-                                                booking,
-                                              );
+                                              final bookingResult =
+                                                  await BookingsController.addBooking(
+                                                    booking,
+                                                  );
+                                              if (!bookingResult['success']) {
+                                                if (context.mounted) {
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        bookingResult['message']
+                                                            .toString(),
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
+                                                return;
+                                              }
 
                                               Navigator.pop(context);
 

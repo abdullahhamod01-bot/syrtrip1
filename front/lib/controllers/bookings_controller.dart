@@ -140,16 +140,13 @@ class BookingsController {
     return localBookings;
   }
 
-  static Future<void> addBooking(Map<String, dynamic> booking) async {
+  static Future<Map<String, dynamic>> addBooking(
+    Map<String, dynamic> booking,
+  ) async {
     final token = await AuthController.getToken();
-    final payload = {...booking, 'status': booking['status'] ?? 'pending'};
-
-    final localBookings = await _readLocalBookings();
-    localBookings.add(payload);
-    await _saveLocalBookings(localBookings);
 
     if (token == null || token.isEmpty) {
-      return;
+      return {'success': false, 'message': 'يرجى تسجيل الدخول أولا'};
     }
 
     try {
@@ -159,7 +156,7 @@ class BookingsController {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode(payload),
+        body: jsonEncode(booking),
       );
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -167,15 +164,25 @@ class BookingsController {
         final createdBooking = decoded['booking'] ?? decoded['data'] ?? decoded;
 
         if (createdBooking is Map) {
-          final updated = await _readLocalBookings();
-          final merged = [
-            ...updated,
-            Map<String, dynamic>.from(createdBooking),
-          ];
-          await _saveLocalBookings(merged);
+          final localBookings = await _readLocalBookings();
+          localBookings.add(Map<String, dynamic>.from(createdBooking));
+          await _saveLocalBookings(localBookings);
         }
+
+        return {'success': true, 'booking': createdBooking};
       }
-    } catch (_) {}
+
+      String message = 'تعذر إنشاء الحجز';
+      try {
+        final decoded = jsonDecode(response.body);
+        if (decoded is Map && decoded['message'] != null) {
+          message = decoded['message'].toString();
+        }
+      } catch (_) {}
+      return {'success': false, 'message': message};
+    } catch (_) {
+      return {'success': false, 'message': 'تعذر الاتصال بالسيرفر'};
+    }
   }
 
   static Future<void> updateBookingStatus(
