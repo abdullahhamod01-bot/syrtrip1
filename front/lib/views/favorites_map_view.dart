@@ -64,7 +64,7 @@ class _FavoritesMapViewState extends State<FavoritesMapView> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          isAr ? 'المفضلة على الخريطة' : 'Favorites on Map',
+          isAr ? '  الخريطة' : ' Map',
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
