@@ -41,6 +41,50 @@ class BookingsController {
 
   static String getStatusLabel(String? status) => normalizeStatus(status);
 
+  static String? normalizeBookingType(Map<String, dynamic> booking) {
+    final rawType = (booking['itemType'] ?? booking['type'] ?? '')
+        .toString()
+        .trim()
+        .toUpperCase();
+
+    if (rawType.contains('HOTEL') || rawType.contains('فندق')) return 'HOTEL';
+    if (rawType.contains('RESTAURANT') || rawType.contains('مطعم')) {
+      return 'RESTAURANT';
+    }
+    if (rawType.contains('CAR') ||
+        rawType.contains('TRANSPORT') ||
+        rawType.contains('سيارة')) {
+      return 'CAR';
+    }
+    return null;
+  }
+
+  static bool hasActiveBookingForType(
+    List<Map<String, dynamic>> bookings,
+    String bookingType,
+  ) {
+    final normalizedType = bookingType.trim().toUpperCase();
+
+    return bookings.any((booking) {
+      final status = normalizeStatus(booking['status']?.toString());
+      final isActive = status == 'قيد الانتظار' || status == 'تمت الموافقة';
+      return isActive && normalizeBookingType(booking) == normalizedType;
+    });
+  }
+
+  static String _bookingTypeMessage(String bookingType) {
+    switch (bookingType) {
+      case 'HOTEL':
+        return 'لديك حجز فندق قائم بالفعل';
+      case 'RESTAURANT':
+        return 'لديك حجز مطعم قائم بالفعل';
+      case 'CAR':
+        return 'لديك حجز سيارة قائم بالفعل';
+      default:
+        return 'لديك حجز قائم من نفس النوع بالفعل';
+    }
+  }
+
   static List<Map<String, dynamic>> getStatusSteps(String? status) {
     final labels = ['تم الطلب', 'قيد الانتظار', 'تمت الموافقة'];
     final current = normalizeStatus(status);
@@ -147,6 +191,14 @@ class BookingsController {
 
     if (token == null || token.isEmpty) {
       return {'success': false, 'message': 'يرجى تسجيل الدخول أولا'};
+    }
+
+    final bookingType = normalizeBookingType(booking);
+    if (bookingType != null) {
+      final existingBookings = await getBookings();
+      if (hasActiveBookingForType(existingBookings, bookingType)) {
+        return {'success': false, 'message': _bookingTypeMessage(bookingType)};
+      }
     }
 
     try {

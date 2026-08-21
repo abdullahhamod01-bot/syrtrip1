@@ -22,6 +22,26 @@ void main() {
       expect(steps[2]['active'], isFalse);
     });
 
+    test('active booking check blocks only the same booking type', () {
+      final bookings = [
+        {'itemType': 'HOTEL', 'status': 'pending'},
+        {'itemType': 'RESTAURANT', 'status': 'rejected'},
+      ];
+
+      expect(
+        BookingsController.hasActiveBookingForType(bookings, 'HOTEL'),
+        isTrue,
+      );
+      expect(
+        BookingsController.hasActiveBookingForType(bookings, 'CAR'),
+        isFalse,
+      );
+      expect(
+        BookingsController.hasActiveBookingForType(bookings, 'RESTAURANT'),
+        isFalse,
+      );
+    });
+
     test(
       'user specific storage flows remain stable for current session',
       () async {
