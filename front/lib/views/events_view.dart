@@ -31,198 +31,6 @@ class _EventsViewState extends State<EventsView> {
     'تدمر',
   ];
 
-  // ===== Demo Events Data =====
-  final List<Map<String, dynamic>> _demoEvents = [
-    {
-      'id': '1',
-      'titleAr': 'مهرجان دمشق السينمائي',
-      'titleEn': 'Damascus Film Festival',
-      'descriptionAr':
-          'أكبر مهرجان سينمائي في سوريا يعرض أفلاماً عربية وعالمية',
-      'descriptionEn':
-          "Syria's largest film festival showcasing Arabic and international films",
-      'city': 'دمشق',
-      'cityEn': 'Damascus',
-      'date': '2026-08-15',
-      'time': '18:00',
-      'category': 'culture',
-      'image':
-          'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400',
-      'location': 'دار الأوبرا - دمشق',
-      'locationEn': 'Opera House - Damascus',
-      'price': 'مجاني',
-      'priceEn': 'Free',
-    },
-    {
-      'id': '2',
-      'titleAr': 'مهرجان حلب التراثي',
-      'titleEn': 'Aleppo Heritage Festival',
-      'descriptionAr': 'احتفال بالتراث الأصيل لمدينة حلب القديمة',
-      'descriptionEn': 'Celebrating the authentic heritage of Old Aleppo',
-      'city': 'حلب',
-      'cityEn': 'Aleppo',
-      'date': '2026-09-01',
-      'time': '10:00',
-      'category': 'heritage',
-      'image':
-          'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400',
-      'location': 'سوق المدينة القديمة',
-      'locationEn': 'Old City Souq',
-      'price': 'مجاني',
-      'priceEn': 'Free',
-    },
-    {
-      'id': '3',
-      'titleAr': 'مهرجان اللاذقية الصيفي',
-      'titleEn': 'Latakia Summer Festival',
-      'descriptionAr': 'فعاليات موسيقية وترفيهية على شاطئ البحر المتوسط',
-      'descriptionEn':
-          'Musical and entertainment events on the Mediterranean coast',
-      'city': 'اللاذقية',
-      'cityEn': 'Latakia',
-      'date': '2026-07-20',
-      'time': '20:00',
-      'category': 'music',
-      'image':
-          'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400',
-      'location': 'كورنيش اللاذقية',
-      'locationEn': 'Latakia Corniche',
-      'price': '5000 ل.س',
-      'priceEn': '5,000 SYP',
-    },
-    {
-      'id': '4',
-      'titleAr': 'مهرجان التفاح في السويداء',
-      'titleEn': 'Apple Festival in Sweida',
-      'descriptionAr': 'مهرجان سنوي يحتفل بموسم حصاد التفاح',
-      'descriptionEn': 'Annual festival celebrating the apple harvest season',
-      'city': 'السويداء',
-      'cityEn': 'Sweida',
-      'date': '2026-10-10',
-      'time': '09:00',
-      'category': 'food',
-      'image':
-          'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400',
-      'location': 'ساحة الشهيد',
-      'locationEn': 'Martyrs Square',
-      'price': 'مجاني',
-      'priceEn': 'Free',
-    },
-    {
-      'id': '5',
-      'titleAr': 'ماراثون دمشق الدولي',
-      'titleEn': 'Damascus International Marathon',
-      'descriptionAr': 'سباق ماراثون يجري في شوارع العاصمة السورية',
-      'descriptionEn':
-          'Marathon race through the streets of the Syrian capital',
-      'city': 'دمشق',
-      'cityEn': 'Damascus',
-      'date': '2026-11-05',
-      'time': '06:00',
-      'category': 'sports',
-      'image':
-          'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=400',
-      'location': 'ساحة الأمويين',
-      'locationEn': 'Umayyad Square',
-      'price': '10000 ل.س',
-      'priceEn': '10,000 SYP',
-    },
-    {
-      'id': '6',
-      'titleAr': 'مهرجان طرطوس البحري',
-      'titleEn': 'Tartus Sea Festival',
-      'descriptionAr': 'فعاليات بحرية ورياضات مائية في مدينة طرطوس',
-      'descriptionEn': 'Marine activities and water sports in Tartus city',
-      'city': 'طرطوس',
-      'cityEn': 'Tartus',
-      'date': '2026-08-01',
-      'time': '16:00',
-      'category': 'sports',
-      'image':
-          'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400',
-      'location': 'شاطئ طرطوس',
-      'locationEn': 'Tartus Beach',
-      'price': '3000 ل.س',
-      'priceEn': '3,000 SYP',
-    },
-    {
-      'id': '7',
-      'titleAr': 'مهرجان الزيتون في حماة',
-      'titleEn': 'Olive Festival in Hama',
-      'descriptionAr': 'احتفال بموسم قطف الزيتون وإنتاج زيت الزيتون',
-      'descriptionEn':
-          'Celebrating the olive picking season and olive oil production',
-      'city': 'حماة',
-      'cityEn': 'Hama',
-      'date': '2026-11-15',
-      'time': '10:00',
-      'category': 'food',
-      'image':
-          'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400',
-      'location': 'ساحة العاصي',
-      'locationEn': 'Orontes Square',
-      'price': 'مجاني',
-      'priceEn': 'Free',
-    },
-    {
-      'id': '8',
-      'titleAr': 'مهرجان الموسيقى الكلاسيكية في حمص',
-      'titleEn': 'Classical Music Festival in Homs',
-      'descriptionAr': 'حفلات موسيقية كلاسيكية من فرق محلية وعالمية',
-      'descriptionEn':
-          'Classical music concerts by local and international orchestras',
-      'city': 'حمص',
-      'cityEn': 'Homs',
-      'date': '2026-09-20',
-      'time': '19:30',
-      'category': 'music',
-      'image':
-          'https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=400',
-      'location': 'دار الثقافة',
-      'locationEn': 'Culture House',
-      'price': '8000 ل.س',
-      'priceEn': '8,000 SYP',
-    },
-    {
-      'id': '9',
-      'titleAr': 'مهرجان الورد في دمشق',
-      'titleEn': 'Damascus Rose Festival',
-      'descriptionAr': 'احتفال بموسم الورد الشامي وصناعة ماء الورد',
-      'descriptionEn':
-          'Celebrating the Damascene rose season and rose water production',
-      'city': 'دمشق',
-      'cityEn': 'Damascus',
-      'date': '2026-05-01',
-      'time': '09:00',
-      'category': 'culture',
-      'image':
-          'https://images.unsplash.com/photo-1490750967868-88aa4f44d83d?w=400',
-      'location': 'حديقة تشرين',
-      'locationEn': 'Tishreen Park',
-      'price': 'مجاني',
-      'priceEn': 'Free',
-    },
-    {
-      'id': '10',
-      'titleAr': 'مهرجان الصحراء في تدمر',
-      'titleEn': 'Desert Festival in Palmyra',
-      'descriptionAr': 'فعاليات تراثية وسياحية في مدينة تدمر الأثرية',
-      'descriptionEn':
-          'Heritage and tourism events in the ancient city of Palmyra',
-      'city': 'تدمر',
-      'cityEn': 'Palmyra',
-      'date': '2026-10-25',
-      'time': '17:00',
-      'category': 'heritage',
-      'image':
-          'https://images.unsplash.com/photo-1548013146-72479768bada?w=400',
-      'location': 'آثار تدمر',
-      'locationEn': 'Palmyra Ruins',
-      'price': '5000 ل.س',
-      'priceEn': '5,000 SYP',
-    },
-  ];
-
   List<Map<String, dynamic>> get _categories {
     return [
       {'key': 'all', 'labelAr': 'الكل', 'labelEn': 'All', 'icon': Icons.apps},
@@ -295,7 +103,6 @@ class _EventsViewState extends State<EventsView> {
   @override
   void initState() {
     super.initState();
-    _events = List<Map<String, dynamic>>.from(_demoEvents);
     _loadFavorites();
     _loadEvents();
   }
@@ -320,7 +127,7 @@ class _EventsViewState extends State<EventsView> {
 
         if (mounted) {
           setState(() {
-            _events = loadedEvents.isNotEmpty ? loadedEvents : _demoEvents;
+            _events = loadedEvents;
             _isLoading = false;
           });
         }
@@ -332,7 +139,7 @@ class _EventsViewState extends State<EventsView> {
 
     if (mounted) {
       setState(() {
-        _events = List<Map<String, dynamic>>.from(_demoEvents);
+        _events = [];
         _isLoading = false;
       });
     }
