@@ -70,12 +70,12 @@ class HotelModel extends PlaceModel {
   /// - null → ترجع [] ✅
   static List<String> _parseImages(dynamic images) {
     if (images == null) return [];
-    
+
     // من الـ API: List مباشرة
     if (images is List) {
       return images.map((e) => e.toString()).toList();
     }
-    
+
     // من SQLite: String JSON
     if (images is String) {
       try {
@@ -88,7 +88,7 @@ class HotelModel extends PlaceModel {
         return [images];
       }
     }
-    
+
     return [];
   }
 

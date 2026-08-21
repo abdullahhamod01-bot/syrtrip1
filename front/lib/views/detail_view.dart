@@ -687,7 +687,8 @@ class _DetailViewState extends State<DetailView> {
                   if (args.locationUrl != null) ...[
                     const SizedBox(height: 12),
                     ElevatedButton.icon(
-                      onPressed: () => Navigator.pushNamed(context, '/map'),
+                      onPressed: () =>
+                          Navigator.pushNamed(context, '/favorites-map'),
                       icon: const Icon(Icons.location_on),
                       label: Text(isArabic ? "عرض الموقع" : "View location"),
                       style: ElevatedButton.styleFrom(
