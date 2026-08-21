@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Set Dev Role Token</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Roboto, 'Segoe UI', Arial; padding: 24px; }
+      button { margin: 8px 0; padding: 10px 14px; border-radius: 8px; border: 1px solid #ccc; cursor: pointer; }
+      .role { display:block; width: 100%; max-width: 320px }
+    </style>
+  </head>
+  <body>
+    <h2>Set Dev Role Token</h2>
+    <p>This helper creates a non-signed JWT-like token and stores it as <strong>syrtrip_token</strong> in localStorage for local development.</p>
+
+    <label>Custom email: <input id="email" placeholder="admin@example.com" style="margin:8px 0;padding:6px;width:280px" /></label>
+    <label>Custom id: <input id="id" placeholder="user-admin" style="margin:8px 0;padding:6px;width:280px" /></label>
+
+    <div>
+      <button class="role" onclick="setToken('admin')">Set Admin</button>
+      <button class="role" onclick="setToken('hotel_owner')">Set Hotel Owner</button>
+      <button class="role" onclick="setToken('restaurant_owner')">Set Restaurant Owner</button>
+      <button class="role" onclick="setToken('car_owner')">Set Car Owner</button>
+      <button class="role" onclick="clearToken()">Clear Token</button>
+    </div>
+
+    <p>After setting a role, open the app at <a href="/">/</a> (refresh may be required).</p>
+
+    <script>
+      function toB64Url(obj) {
+        return btoa(JSON.stringify(obj)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      }
+
+      function setToken(role) {
+        const email = document.getElementById('email').value || role + '@example.com';
+        const id = document.getElementById('id').value || 'user-' + role;
+        const header = { alg: 'none', typ: 'JWT' };
+        const payload = { role, email, userId: id };
+        const token = `${toB64Url(header)}.${toB64Url(payload)}.`;
+        localStorage.setItem('syrtrip_token', token);
+        alert('Token set for ' + role + '. Navigate to the app and refresh.');
+      }
+
+      function clearToken() {
+        localStorage.removeItem('syrtrip_token');
+        alert('Cleared syrtrip_token');
+      }
+    </script>
+  </body>
+</html>
