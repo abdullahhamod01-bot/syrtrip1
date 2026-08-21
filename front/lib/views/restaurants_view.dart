@@ -107,7 +107,6 @@ class _RestaurantsViewState extends State<RestaurantsView> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7FBFF),
       drawer: const MainDrawer(),
       appBar: const CustomAppBar(),
       body: isLoading

@@ -123,7 +123,6 @@ class _BookingsViewState extends State<BookingsView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7FBFF),
       drawer: const MainDrawer(),
       appBar: const CustomAppBar(),
       body: isLoading

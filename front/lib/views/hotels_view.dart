@@ -122,7 +122,6 @@ class _HotelsViewState extends State<HotelsView> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7FBFF),
       drawer: const MainDrawer(),
       appBar: const CustomAppBar(),
 

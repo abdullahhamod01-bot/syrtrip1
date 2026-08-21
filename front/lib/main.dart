@@ -66,50 +66,9 @@ class SyrTripApp extends StatelessWidget {
             title: 'SyrTrip',
             debugShowCheckedModeBanner: false,
 
-            theme: ThemeData(
-              primaryColor: Colors.green,
-              scaffoldBackgroundColor: Colors.white,
-              fontFamily: 'Cairo',
-              useMaterial3: true,
-
-              colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-
-              appBarTheme: const AppBarTheme(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-                centerTitle: true,
-              ),
-
-              elevatedButtonTheme: ElevatedButtonThemeData(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-            ),
-
-            darkTheme: ThemeData.dark().copyWith(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: Colors.green,
-                brightness: Brightness.dark,
-              ),
-              scaffoldBackgroundColor: const Color(0xFF121212),
-              appBarTheme: const AppBarTheme(
-                backgroundColor: Color(0xFF1B5E20),
-                foregroundColor: Colors.white,
-                centerTitle: true,
-              ),
-              elevatedButtonTheme: ElevatedButtonThemeData(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green[700],
-                  foregroundColor: Colors.white,
-                ),
-              ),
-            ),
-
-            themeMode: appProvider.isDarkMode
-                ? ThemeMode.dark
-                : ThemeMode.light,
+            theme: appProvider.lightTheme,
+            darkTheme: appProvider.darkTheme,
+            themeMode: appProvider.themeMode,
 
             // ═══════════════════════════════════════════════════
             // ←←← هون التعديل: بنمرر isLoggedIn للـ SplashView

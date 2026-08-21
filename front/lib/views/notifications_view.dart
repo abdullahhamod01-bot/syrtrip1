@@ -59,8 +59,10 @@ class _NotificationsViewState extends State<NotificationsView> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF7FBFF),
       drawer: const MainDrawer(),
       appBar: const CustomAppBar(),
       body: isLoading
@@ -95,7 +97,11 @@ class _NotificationsViewState extends State<NotificationsView> {
                         final read = _isRead(notification);
 
                         return Card(
-                          color: read ? Colors.white : const Color(0xFFE8F5E9),
+                          color: read
+                              ? colorScheme.surface
+                              : (theme.brightness == Brightness.dark
+                                    ? const Color(0xFF1B3A25)
+                                    : const Color(0xFFE8F5E9)),
                           child: ListTile(
                             leading: Icon(
                               read

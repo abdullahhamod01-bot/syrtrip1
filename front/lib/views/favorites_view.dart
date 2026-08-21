@@ -139,8 +139,6 @@ class _FavoritesViewState extends State<FavoritesView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7FBFF),
-
       drawer: const MainDrawer(),
       appBar: const CustomAppBar(),
 

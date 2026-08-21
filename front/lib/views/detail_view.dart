@@ -203,7 +203,6 @@ class _DetailViewState extends State<DetailView> {
     return Scaffold(
       drawer: const MainDrawer(),
       appBar: const CustomAppBar(),
-      backgroundColor: const Color(0xFFF7FBFF),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
