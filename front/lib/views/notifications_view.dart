@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../controllers/notifications_controller.dart';
+import '../providers/app_provider.dart';
 import '../widgets/custom_appbar.dart';
 import '../widgets/main_drawer.dart';
 
@@ -61,6 +63,7 @@ class _NotificationsViewState extends State<NotificationsView> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isArabic = context.watch<AppProvider>().isArabic;
 
     return Scaffold(
       drawer: const MainDrawer(),
@@ -72,10 +75,16 @@ class _NotificationsViewState extends State<NotificationsView> {
               child: notifications.isEmpty
                   ? ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      children: const [
+                      children: [
                         SizedBox(
                           height: 500,
-                          child: Center(child: Text('لا توجد إشعارات حالياً')),
+                          child: Center(
+                            child: Text(
+                              isArabic
+                                  ? 'لا توجد إشعارات حالياً'
+                                  : 'No notifications yet',
+                            ),
+                          ),
                         ),
                       ],
                     )
@@ -110,7 +119,9 @@ class _NotificationsViewState extends State<NotificationsView> {
                               color: const Color(0xFF2E7D63),
                             ),
                             title: Text(
-                              title.isEmpty ? 'إشعار' : title,
+                              title.isEmpty
+                                  ? (isArabic ? 'إشعار' : 'Notification')
+                                  : title,
                               style: TextStyle(
                                 fontWeight: read
                                     ? FontWeight.normal

@@ -6,6 +6,7 @@ import '../models/hotel_model.dart';
 import '../widgets/custom_card.dart';
 import '../controllers/favorites_controller.dart';
 import '../providers/hotelas_filter_provider.dart';
+import '../providers/app_provider.dart';
 import '../services/hotel_service.dart';
 import 'detail_view.dart';
 
@@ -109,6 +110,7 @@ class _HotelsViewState extends State<HotelsView> {
   Widget build(BuildContext context) {
     // subscribe to filter provider to trigger rebuilds when it changes
     context.watch<FilterProvider>().selectedFilter;
+    final isArabic = context.watch<AppProvider>().isArabic;
 
     final filteredHotels = hotels.where((h) {
       final matchesSearch =
@@ -143,7 +145,9 @@ class _HotelsViewState extends State<HotelsView> {
                                   onChanged: (value) =>
                                       setState(() => _searchQuery = value),
                                   decoration: InputDecoration(
-                                    hintText: 'ابحث عن فندق أو مدينة...',
+                                    hintText: isArabic
+                                        ? 'ابحث عن فندق أو مدينة...'
+                                        : 'Search for a hotel or city...',
                                     prefixIcon: const Icon(Icons.search),
                                     suffixIcon: _searchQuery.isNotEmpty
                                         ? IconButton(
@@ -178,7 +182,7 @@ class _HotelsViewState extends State<HotelsView> {
                                     }
                                   },
                                   decoration: InputDecoration(
-                                    labelText: 'المدينة',
+                                    labelText: isArabic ? 'المدينة' : 'City',
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),

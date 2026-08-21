@@ -8,6 +8,7 @@ import '../controllers/favorites_controller.dart';
 import '../widgets/custom_appbar.dart';
 import '../widgets/main_drawer.dart';
 import '../providers/restaurant_filter_provider.dart';
+import '../providers/app_provider.dart';
 import '../services/restaurant_service.dart';
 import 'detail_view.dart';
 
@@ -90,6 +91,7 @@ class _RestaurantsViewState extends State<RestaurantsView> {
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.watch<AppProvider>().isArabic;
     final selectedFilter = context
         .watch<RestaurantFilterProvider>()
         .selectedFilter;
@@ -125,7 +127,9 @@ class _RestaurantsViewState extends State<RestaurantsView> {
                             onChanged: (value) =>
                                 setState(() => _searchQuery = value),
                             decoration: InputDecoration(
-                              hintText: 'ابحث عن مطعم أو مدينة...',
+                              hintText: isArabic
+                                  ? 'ابحث عن مطعم أو مدينة...'
+                                  : 'Search for a restaurant or city...',
                               prefixIcon: const Icon(Icons.search),
                               suffixIcon: _searchQuery.isNotEmpty
                                   ? IconButton(
@@ -158,7 +162,7 @@ class _RestaurantsViewState extends State<RestaurantsView> {
                                 setState(() => _selectedCity = value);
                             },
                             decoration: InputDecoration(
-                              labelText: 'المدينة',
+                              labelText: isArabic ? 'المدينة' : 'City',
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),

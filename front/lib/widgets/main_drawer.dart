@@ -35,6 +35,7 @@ class _MainDrawerState extends State<MainDrawer> {
   @override
   Widget build(BuildContext context) {
     final appProvider = context.watch<AppProvider>();
+    final isArabic = appProvider.isArabic;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -82,7 +83,7 @@ class _MainDrawerState extends State<MainDrawer> {
                 children: [
                   _drawerItem(
                     icon: Icons.currency_exchange,
-                    title: "صرف العملة",
+                    title: isArabic ? "صرف العملة" : "Currency exchange",
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.pushNamed(context, '/currency');
@@ -91,7 +92,7 @@ class _MainDrawerState extends State<MainDrawer> {
 
                   _drawerItem(
                     icon: Icons.map,
-                    title: " الخريطة",
+                    title: isArabic ? "الخريطة" : "Map",
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.pushNamed(context, '/favorites-map');
@@ -100,7 +101,7 @@ class _MainDrawerState extends State<MainDrawer> {
 
                   _drawerItem(
                     icon: Icons.event,
-                    title: "فعاليات سوريا",
+                    title: isArabic ? "فعاليات سوريا" : "Syria events",
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.pushNamed(context, '/events');
@@ -109,7 +110,7 @@ class _MainDrawerState extends State<MainDrawer> {
 
                   _drawerItem(
                     icon: Icons.notifications,
-                    title: "الإشعارات",
+                    title: isArabic ? "الإشعارات" : "Notifications",
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.pushNamed(context, '/notifications');
@@ -118,7 +119,7 @@ class _MainDrawerState extends State<MainDrawer> {
 
                   _drawerItem(
                     icon: Icons.settings,
-                    title: "الإعدادات",
+                    title: isArabic ? "الإعدادات" : "Settings",
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.pushNamed(context, '/settings');
@@ -136,8 +137,8 @@ class _MainDrawerState extends State<MainDrawer> {
                       value: appProvider.isDarkMode,
                       activeColor: const Color(0xFF2E7D63),
                       secondary: const Icon(Icons.dark_mode),
-                      title: const Text(
-                        "الوضع الداكن",
+                      title: Text(
+                        isArabic ? "الوضع الداكن" : "Dark mode",
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                       onChanged: (_) {
@@ -149,7 +150,7 @@ class _MainDrawerState extends State<MainDrawer> {
                   /// اللغة
                   _drawerItem(
                     icon: Icons.language,
-                    title: "اللغة",
+                    title: isArabic ? "اللغة" : "Language",
                     onTap: () {
                       showModalBottomSheet(
                         context: context,
@@ -164,8 +165,8 @@ class _MainDrawerState extends State<MainDrawer> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Text(
-                                  "اختر اللغة",
+                                Text(
+                                  isArabic ? "اختر اللغة" : "Choose language",
                                   style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
@@ -173,11 +174,17 @@ class _MainDrawerState extends State<MainDrawer> {
                                 ),
                                 const SizedBox(height: 20),
 
-                                _langTile("العربية", Icons.language, () {
-                                  context.read<AppProvider>().setLanguage('ar');
+                                _langTile(
+                                  isArabic ? "العربية" : "Arabic",
+                                  Icons.language,
+                                  () {
+                                    context.read<AppProvider>().setLanguage(
+                                      'ar',
+                                    );
 
-                                  Navigator.pop(context);
-                                }),
+                                    Navigator.pop(context);
+                                  },
+                                ),
 
                                 _langTile("English", Icons.language, () {
                                   context.read<AppProvider>().setLanguage('en');
@@ -194,7 +201,7 @@ class _MainDrawerState extends State<MainDrawer> {
 
                   _drawerItem(
                     icon: Icons.info_outline,
-                    title: "حول التطبيق",
+                    title: isArabic ? "حول التطبيق" : "About the app",
                     onTap: () {
                       showDialog(
                         context: context,
@@ -204,7 +211,9 @@ class _MainDrawerState extends State<MainDrawer> {
                               borderRadius: BorderRadius.circular(20),
                             ),
                             title: const Text("SyrTrip"),
-                            content: const Text("إصدار 1.0.0"),
+                            content: Text(
+                              isArabic ? "إصدار 1.0.0" : "Version 1.0.0",
+                            ),
                           );
                         },
                       );
@@ -223,9 +232,9 @@ class _MainDrawerState extends State<MainDrawer> {
                 ),
                 child: ListTile(
                   leading: const Icon(Icons.logout, color: Colors.red),
-                  title: const Text(
-                    "تسجيل الخروج",
-                    style: TextStyle(
+                  title: Text(
+                    isArabic ? "تسجيل الخروج" : "Log out",
+                    style: const TextStyle(
                       color: Colors.red,
                       fontWeight: FontWeight.bold,
                     ),
@@ -243,7 +252,13 @@ class _MainDrawerState extends State<MainDrawer> {
                     );
 
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('تم تسجيل الخروج')),
+                      SnackBar(
+                        content: Text(
+                          isArabic
+                              ? 'تم تسجيل الخروج'
+                              : 'Logged out successfully',
+                        ),
+                      ),
                     );
                   },
                 ),

@@ -7,6 +7,7 @@ import '../widgets/custom_card.dart';
 import '../controllers/favorites_controller.dart';
 import '../widgets/custom_appbar.dart';
 import '../providers/attraction_filter_provider.dart';
+import '../providers/app_provider.dart';
 import '../models/place_model.dart';
 import '../services/place_service.dart';
 import 'detail_view.dart';
@@ -88,6 +89,7 @@ class _AttractionsViewState extends State<AttractionsView> {
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.watch<AppProvider>().isArabic;
     final selectedFilter = context
         .watch<AttractionFilterProvider>()
         .selectedFilter;
@@ -123,7 +125,9 @@ class _AttractionsViewState extends State<AttractionsView> {
                             onChanged: (value) =>
                                 setState(() => _searchQuery = value),
                             decoration: InputDecoration(
-                              hintText: 'ابحث عن معلم أو مدينة...',
+                              hintText: isArabic
+                                  ? 'ابحث عن معلم أو مدينة...'
+                                  : 'Search for an attraction or city...',
                               prefixIcon: const Icon(Icons.search),
                               suffixIcon: _searchQuery.isNotEmpty
                                   ? IconButton(
@@ -156,7 +160,7 @@ class _AttractionsViewState extends State<AttractionsView> {
                                 setState(() => _selectedCity = value);
                             },
                             decoration: InputDecoration(
-                              labelText: 'المدينة',
+                              labelText: isArabic ? 'المدينة' : 'City',
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),

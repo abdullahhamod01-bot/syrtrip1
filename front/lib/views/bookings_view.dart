@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../controllers/bookings_controller.dart';
 import '../widgets/custom_appbar.dart';
 import '../widgets/main_drawer.dart';
+import '../providers/app_provider.dart';
 
 class BookingsView extends StatefulWidget {
   const BookingsView({super.key});
@@ -122,6 +124,9 @@ class _BookingsViewState extends State<BookingsView> {
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.watch<AppProvider>().isArabic;
+    final theme = Theme.of(context);
+
     return Scaffold(
       drawer: const MainDrawer(),
       appBar: const CustomAppBar(),
@@ -132,13 +137,15 @@ class _BookingsViewState extends State<BookingsView> {
               child: bookings.isEmpty
                   ? ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      children: const [
+                      children: [
                         SizedBox(
                           height: 500,
                           child: Center(
                             child: Text(
-                              'لا توجد حجوزات حالياً',
-                              style: TextStyle(fontSize: 16),
+                              isArabic
+                                  ? 'لا توجد حجوزات حالياً'
+                                  : 'No bookings yet',
+                              style: const TextStyle(fontSize: 16),
                             ),
                           ),
                         ),
@@ -161,7 +168,7 @@ class _BookingsViewState extends State<BookingsView> {
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(18),
-                            color: Colors.white,
+                            color: theme.colorScheme.surface,
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.06),
@@ -202,7 +209,7 @@ class _BookingsViewState extends State<BookingsView> {
                                           child: Text(
                                             b['title']?.toString() ??
                                                 b['name']?.toString() ??
-                                                'حجز',
+                                                (isArabic ? 'حجز' : 'Booking'),
                                             style: const TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold,
@@ -243,7 +250,11 @@ class _BookingsViewState extends State<BookingsView> {
                                         ),
                                         const SizedBox(width: 6),
                                         Text(
-                                          type.isNotEmpty ? type : 'نوع الحجز',
+                                          type.isNotEmpty
+                                              ? type
+                                              : (isArabic
+                                                    ? 'نوع الحجز'
+                                                    : 'Booking type'),
                                           style: TextStyle(
                                             color: Colors.grey[700],
                                             fontSize: 12,
@@ -263,7 +274,9 @@ class _BookingsViewState extends State<BookingsView> {
                                         Text(
                                           b['date']?.toString() ??
                                               b['startDate']?.toString() ??
-                                              'غير محدد',
+                                              (isArabic
+                                                  ? 'غير محدد'
+                                                  : 'Not specified'),
                                           style: TextStyle(
                                             color: Colors.grey[700],
                                             fontSize: 12,
@@ -286,9 +299,11 @@ class _BookingsViewState extends State<BookingsView> {
                                           Icons.delete,
                                           color: Colors.red,
                                         ),
-                                        label: const Text(
-                                          'حذف',
-                                          style: TextStyle(color: Colors.red),
+                                        label: Text(
+                                          isArabic ? 'حذف' : 'Delete',
+                                          style: const TextStyle(
+                                            color: Colors.red,
+                                          ),
                                         ),
                                       ),
                                     ),

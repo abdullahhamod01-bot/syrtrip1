@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'controllers/auth_controller.dart';
@@ -69,6 +70,19 @@ class SyrTripApp extends StatelessWidget {
             theme: appProvider.lightTheme,
             darkTheme: appProvider.darkTheme,
             themeMode: appProvider.themeMode,
+            locale: appProvider.locale,
+            supportedLocales: const [Locale('ar'), Locale('en')],
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            builder: (context, child) {
+              return Directionality(
+                textDirection: appProvider.textDirection,
+                child: child ?? const SizedBox.shrink(),
+              );
+            },
 
             // ═══════════════════════════════════════════════════
             // ←←← هون التعديل: بنمرر isLoggedIn للـ SplashView

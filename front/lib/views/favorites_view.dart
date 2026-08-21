@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import '../controllers/favorites_controller.dart';
 import '../widgets/custom_card.dart';
 import '../widgets/custom_appbar.dart';
 import '../widgets/main_drawer.dart';
+import '../providers/app_provider.dart';
 import 'detail_view.dart';
 import '../models/hotel_model.dart';
 import '../models/restaurant_model.dart';
@@ -138,6 +140,8 @@ class _FavoritesViewState extends State<FavoritesView> {
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.watch<AppProvider>().isArabic;
+
     return Scaffold(
       drawer: const MainDrawer(),
       appBar: const CustomAppBar(),
@@ -149,7 +153,9 @@ class _FavoritesViewState extends State<FavoritesView> {
               child: allItems.isEmpty
                   ? Center(
                       child: Text(
-                        'لا توجد عناصر مفضلة بعد',
+                        isArabic
+                            ? 'لا توجد عناصر مفضلة بعد'
+                            : 'No favorites yet',
                         style: TextStyle(color: Colors.grey[600]),
                       ),
                     )

@@ -7,6 +7,7 @@ import '../widgets/custom_appbar.dart';
 import '../widgets/main_drawer.dart';
 import '../controllers/reviews_controller.dart';
 import '../controllers/favorites_controller.dart';
+import '../providers/app_provider.dart';
 import 'paypal_payment_view.dart';
 
 enum DetailType { hotel, restaurant, attraction, transport }
@@ -199,6 +200,7 @@ class _DetailViewState extends State<DetailView> {
   @override
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as DetailArguments;
+    final isArabic = context.watch<AppProvider>().isArabic;
 
     return Scaffold(
       drawer: const MainDrawer(),
@@ -412,7 +414,7 @@ class _DetailViewState extends State<DetailView> {
 
                     ElevatedButton.icon(
                       icon: const Icon(Icons.event_available),
-                      label: const Text('احجز السيارة'),
+                      label: Text(isArabic ? 'احجز السيارة' : 'Book car'),
                       onPressed: () =>
                           _bookByDateRange(args, itemType: 'استئجار سيارة'),
                       style: ElevatedButton.styleFrom(
@@ -429,7 +431,7 @@ class _DetailViewState extends State<DetailView> {
                   if (args.type == DetailType.hotel) ...[
                     ElevatedButton.icon(
                       icon: const Icon(Icons.event_available),
-                      label: const Text('احجز غرفة'),
+                      label: Text(isArabic ? 'احجز غرفة' : 'Book room'),
                       onPressed: () =>
                           _bookByDateRange(args, itemType: 'غرفة الفندق'),
                       style: ElevatedButton.styleFrom(
@@ -687,7 +689,7 @@ class _DetailViewState extends State<DetailView> {
                     ElevatedButton.icon(
                       onPressed: () => Navigator.pushNamed(context, '/map'),
                       icon: const Icon(Icons.location_on),
-                      label: const Text("عرض الموقع"),
+                      label: Text(isArabic ? "عرض الموقع" : "View location"),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,
@@ -699,8 +701,10 @@ class _DetailViewState extends State<DetailView> {
                     ),
                   ],
                   const SizedBox(height: 24),
-                  const Text(
-                    "أضف تقييمك وتعليقك",
+                  Text(
+                    isArabic
+                        ? "أضف تقييمك وتعليقك"
+                        : "Add your rating and review",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
@@ -723,7 +727,9 @@ class _DetailViewState extends State<DetailView> {
                     keyboardType: TextInputType.multiline,
                     textInputAction: TextInputAction.done,
                     decoration: InputDecoration(
-                      hintText: "اكتب تعليقك هنا...",
+                      hintText: isArabic
+                          ? "اكتب تعليقك هنا..."
+                          : "Write your review...",
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -737,8 +743,8 @@ class _DetailViewState extends State<DetailView> {
                     onChanged: (_) => setState(() {}),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    "تعليقات الزوار",
+                  Text(
+                    isArabic ? "تعليقات الزوار" : "Visitor reviews",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
@@ -748,8 +754,8 @@ class _DetailViewState extends State<DetailView> {
                       child: Center(child: CircularProgressIndicator()),
                     )
                   else if (_reviews.isEmpty)
-                    const Text(
-                      "لا توجد تعليقات بعد.",
+                    Text(
+                      isArabic ? "لا توجد تعليقات بعد." : "No reviews yet.",
                       style: TextStyle(color: Colors.grey),
                     )
                   else

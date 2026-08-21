@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import '../models/transport_model.dart';
 import '../models/office_model.dart';
 import '../services/car_service.dart';
@@ -11,6 +12,7 @@ import '../controllers/favorites_controller.dart';
 import '../widgets/custom_appbar.dart';
 import 'detail_view.dart';
 import '../widgets/main_drawer.dart';
+import '../providers/app_provider.dart';
 
 class TransportView extends StatefulWidget {
   const TransportView({super.key});
@@ -108,6 +110,7 @@ class _TransportViewState extends State<TransportView> {
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.watch<AppProvider>().isArabic;
     final filteredTransports = cars.where((t) {
       final matchesSearch =
           _searchQuery.isEmpty ||
@@ -137,7 +140,9 @@ class _TransportViewState extends State<TransportView> {
                       onChanged: (value) =>
                           setState(() => _searchQuery = value),
                       decoration: InputDecoration(
-                        hintText: 'ابحث عن سيارة أو مدينة...',
+                        hintText: isArabic
+                            ? 'ابحث عن سيارة أو مدينة...'
+                            : 'Search for a car or city...',
                         prefixIcon: const Icon(Icons.search),
                         suffixIcon: _searchQuery.isNotEmpty
                             ? IconButton(
@@ -170,7 +175,7 @@ class _TransportViewState extends State<TransportView> {
                           setState(() => _selectedCity = value);
                       },
                       decoration: InputDecoration(
-                        labelText: 'المدينة',
+                        labelText: isArabic ? 'المدينة' : 'City',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
