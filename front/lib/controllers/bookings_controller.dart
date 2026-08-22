@@ -217,7 +217,10 @@ class BookingsController {
 
         if (createdBooking is Map) {
           final localBookings = await _readLocalBookings();
-          localBookings.add(Map<String, dynamic>.from(createdBooking));
+          localBookings.add({
+            ...Map<String, dynamic>.from(createdBooking),
+            ...booking,
+          });
           await _saveLocalBookings(localBookings);
         }
 

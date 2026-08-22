@@ -158,6 +158,15 @@ class _DetailViewState extends State<DetailView> {
       'itemType': args.type == DetailType.hotel ? 'HOTEL' : 'CAR',
       if (args.type == DetailType.hotel) 'hotelId': args.id,
       if (args.type == DetailType.transport) 'carId': args.id,
+      'itemName': args.name,
+      'itemDescription': args.description,
+      'itemImages': args.images,
+      'itemLocation': args.locationUrl,
+      'itemLatitude': args.latitude,
+      'itemLongitude': args.longitude,
+      if (args.type == DetailType.transport)
+        'itemVehicleType': args.vehicleType,
+      if (args.type == DetailType.transport) 'itemPrice': args.pricePerNight,
       'startDate': picked.start.toIso8601String(),
       'endDate': picked.end.toIso8601String(),
     };
@@ -609,6 +618,14 @@ class _DetailViewState extends State<DetailView> {
                                               final booking = {
                                                 'itemType': 'RESTAURANT',
                                                 'restaurantId': args.id,
+                                                'itemName': args.name,
+                                                'itemDescription':
+                                                    args.description,
+                                                'itemImages': args.images,
+                                                'itemLocation':
+                                                    args.locationUrl,
+                                                'itemLatitude': args.latitude,
+                                                'itemLongitude': args.longitude,
                                                 'bookingTime': timeStr,
                                               };
 
