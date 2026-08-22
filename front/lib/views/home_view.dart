@@ -16,6 +16,7 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   int _index = 2; // default to attractions like original
+  late final PageController _pageController;
 
   final List<Widget> _screens = const [
     TransportView(),
@@ -27,12 +28,37 @@ class _HomeViewState extends State<HomeView> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _index);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_index],
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          if (_index != index) setState(() => _index = index);
+        },
+        children: _screens,
+      ),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _index,
-        onTap: (i) => setState(() => _index = i),
+        onTap: (i) {
+          setState(() => _index = i);
+          _pageController.animateToPage(
+            i,
+            duration: const Duration(milliseconds: 280),
+            curve: Curves.easeInOut,
+          );
+        },
       ),
     );
   }
