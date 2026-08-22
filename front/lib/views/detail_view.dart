@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:SyrTrip/controllers/bookings_controller.dart'
@@ -78,6 +79,7 @@ class _DetailViewState extends State<DetailView> {
   @override
   void initState() {
     super.initState();
+    FavoritesController.favoritesNotifier.addListener(_onFavoritesChanged);
     Future.delayed(Duration.zero, () async {
       final args =
           ModalRoute.of(context)!.settings.arguments as DetailArguments;
@@ -87,6 +89,25 @@ class _DetailViewState extends State<DetailView> {
         _loadReviews(args);
       }
     });
+  }
+
+  void _onFavoritesChanged() {
+    final args = ModalRoute.of(context)?.settings.arguments as DetailArguments?;
+    if (args != null && mounted) {
+      setState(
+        () => isFavorite = FavoritesController.favoritesNotifier.value.contains(
+          args.id,
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    FavoritesController.favoritesNotifier.removeListener(_onFavoritesChanged);
+    _controller.dispose();
+    _pageController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadReviews(DetailArguments args) async {
@@ -338,11 +359,13 @@ class _DetailViewState extends State<DetailView> {
                           color: Colors.red,
                         ),
                         onPressed: () async {
-                          await FavoritesController.toggleFavorite(args.id);
-                          final fav = await FavoritesController.isFavorite(
-                            args.id,
+                          final nextValue = !isFavorite;
+                          if (mounted) {
+                            setState(() => isFavorite = nextValue);
+                          }
+                          unawaited(
+                            FavoritesController.toggleFavorite(args.id),
                           );
-                          if (mounted) setState(() => isFavorite = fav);
                         },
                       ),
                     ],

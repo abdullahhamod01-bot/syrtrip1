@@ -39,7 +39,21 @@ class _TransportViewState extends State<TransportView> {
   @override
   void initState() {
     super.initState();
+    FavoritesController.favoritesNotifier.addListener(_onFavoritesChanged);
     _loadData();
+  }
+
+  void _onFavoritesChanged() {
+    if (mounted)
+      setState(
+        () => favs = FavoritesController.favoritesNotifier.value.toList(),
+      );
+  }
+
+  @override
+  void dispose() {
+    FavoritesController.favoritesNotifier.removeListener(_onFavoritesChanged);
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -85,11 +99,6 @@ class _TransportViewState extends State<TransportView> {
     }
   }
 
-  Future<void> _loadFavorites() async {
-    favs = await FavoritesController.loadFavorites();
-    if (mounted) setState(() {});
-  }
-
   Future<void> _refreshTransport() async {
     await _loadData();
   }
@@ -103,7 +112,6 @@ class _TransportViewState extends State<TransportView> {
       ),
       onPressed: () async {
         await FavoritesController.toggleFavorite(id);
-        await _loadFavorites();
       },
     );
   }

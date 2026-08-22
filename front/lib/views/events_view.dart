@@ -105,8 +105,22 @@ class _EventsViewState extends State<EventsView> {
   @override
   void initState() {
     super.initState();
+    FavoritesController.favoritesNotifier.addListener(_onFavoritesChanged);
     _loadFavorites();
     _loadEvents();
+  }
+
+  void _onFavoritesChanged() {
+    if (mounted)
+      setState(
+        () => favs = FavoritesController.favoritesNotifier.value.toList(),
+      );
+  }
+
+  @override
+  void dispose() {
+    FavoritesController.favoritesNotifier.removeListener(_onFavoritesChanged);
+    super.dispose();
   }
 
   Future<void> _loadFavorites() async {
@@ -837,10 +851,15 @@ class _EventsViewState extends State<EventsView> {
                               child: ElevatedButton.icon(
                                 onPressed: () async {
                                   final id = event['id'].toString();
-                                  await FavoritesController.toggleFavorite(id);
-                                  await _loadFavorites();
-                                  final isNowFav =
-                                      await FavoritesController.isFavorite(id);
+                                  final isNowFav = !favs.contains(id);
+                                  setState(() {
+                                    if (isNowFav) {
+                                      favs.add(id);
+                                    } else {
+                                      favs.remove(id);
+                                    }
+                                  });
+                                  FavoritesController.toggleFavorite(id);
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
@@ -856,12 +875,12 @@ class _EventsViewState extends State<EventsView> {
                                   );
                                 },
                                 icon: Icon(
-                                  favs.contains(event['id'])
+                                  favs.contains(event['id'].toString())
                                       ? Icons.favorite
                                       : Icons.favorite_border,
                                 ),
                                 label: Text(
-                                  favs.contains(event['id'])
+                                  favs.contains(event['id'].toString())
                                       ? (isAr
                                             ? 'إزالة من المفضلة'
                                             : 'Remove from Favorites')

@@ -38,7 +38,21 @@ class _RestaurantsViewState extends State<RestaurantsView> {
   @override
   void initState() {
     super.initState();
+    FavoritesController.favoritesNotifier.addListener(_onFavoritesChanged);
     _loadData();
+  }
+
+  void _onFavoritesChanged() {
+    if (mounted)
+      setState(
+        () => favs = FavoritesController.favoritesNotifier.value.toList(),
+      );
+  }
+
+  @override
+  void dispose() {
+    FavoritesController.favoritesNotifier.removeListener(_onFavoritesChanged);
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -84,7 +98,6 @@ class _RestaurantsViewState extends State<RestaurantsView> {
       ),
       onPressed: () async {
         await FavoritesController.toggleFavorite(id);
-        await _loadData();
       },
     );
   }

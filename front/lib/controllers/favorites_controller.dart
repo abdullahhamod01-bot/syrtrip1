@@ -1,10 +1,14 @@
 // lib/controllers/favorites_controller.dart
 import 'dart:convert';
+import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 import 'auth_controller.dart';
 
 class FavoritesController {
+  static final ValueNotifier<Set<String>> favoritesNotifier =
+      ValueNotifier<Set<String>>(<String>{});
   static const _keyPrefix = 'syrtrip_favorites';
   static const String _favoritesBaseUrl =
       'https://syr-trip-backend.vercel.app/api/interactions/favorites';
@@ -26,6 +30,7 @@ class FavoritesController {
   static Future<void> saveFavorites(List<String> ids) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(await _userKey(), jsonEncode(ids));
+    favoritesNotifier.value = Set<String>.from(ids);
   }
 
   static List<String> _extractFavoriteIds(dynamic payload) {
@@ -81,6 +86,7 @@ class FavoritesController {
     final token = await AuthController.getToken();
 
     if (token == null || token.isEmpty) {
+      favoritesNotifier.value = Set<String>.from(localFavorites);
       return localFavorites;
     }
 
@@ -106,11 +112,12 @@ class FavoritesController {
       // fallback to local storage if server is unavailable
     }
 
+    favoritesNotifier.value = Set<String>.from(localFavorites);
     return localFavorites;
   }
 
   static Future<void> toggleFavorite(String id) async {
-    final favs = await loadFavorites();
+    final favs = await _readLocalFavorites();
     final willAdd = !favs.contains(id);
     final updated = willAdd
         ? [...favs, id]
@@ -121,6 +128,14 @@ class FavoritesController {
     final token = await AuthController.getToken();
     if (token == null || token.isEmpty) return;
 
+    unawaited(_syncFavorite(id, willAdd, token));
+  }
+
+  static Future<void> _syncFavorite(
+    String id,
+    bool willAdd,
+    String token,
+  ) async {
     try {
       if (willAdd) {
         final response = await http.post(
