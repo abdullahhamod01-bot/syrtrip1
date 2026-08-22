@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -7,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../controllers/favorites_controller.dart';
 import '../providers/app_provider.dart';
+import 'detail_view.dart';
 
 class FavoritesMapView extends StatefulWidget {
   const FavoritesMapView({super.key});
@@ -47,19 +46,18 @@ class _FavoritesMapViewState extends State<FavoritesMapView> {
     }
   }
 
-  LatLng _getRandomLocation(LatLng base, double maxOffsetKm) {
-    final random = Random();
-    final offset = maxOffsetKm * 0.009;
-    return LatLng(
-      base.latitude + (random.nextDouble() - 0.5) * offset,
-      base.longitude + (random.nextDouble() - 0.5) * offset,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final appProvider = context.watch<AppProvider>();
     final isAr = appProvider.isArabic;
+    final args = ModalRoute.of(context)?.settings.arguments;
+    final detail = args is DetailArguments ? args : null;
+    final selectedLocation =
+        detail?.latitude != null && detail?.longitude != null
+        ? LatLng(detail!.latitude!, detail.longitude!)
+        : null;
+    final center = selectedLocation ?? _syriaCenter;
+    final zoom = selectedLocation == null ? _defaultZoom : 15.0;
 
     return Scaffold(
       appBar: AppBar(
@@ -92,16 +90,20 @@ class _FavoritesMapViewState extends State<FavoritesMapView> {
           Expanded(
             child: FlutterMap(
               mapController: _mapController,
-              options: const MapOptions(
-                initialCenter: _syriaCenter,
-                initialZoom: _defaultZoom,
-              ),
+              options: MapOptions(initialCenter: center, initialZoom: zoom),
               children: [
                 TileLayer(
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   userAgentPackageName: 'com.example.syrtrip',
                 ),
-                MarkerLayer(markers: _buildMarkers(context, isAr)),
+                MarkerLayer(
+                  markers: _buildMarkers(
+                    context,
+                    isAr,
+                    detail,
+                    selectedLocation,
+                  ),
+                ),
               ],
             ),
           ),
@@ -144,16 +146,54 @@ class _FavoritesMapViewState extends State<FavoritesMapView> {
     );
   }
 
-  List<Marker> _buildMarkers(BuildContext context, bool isAr) {
+  List<Marker> _buildMarkers(
+    BuildContext context,
+    bool isAr,
+    DetailArguments? detail,
+    LatLng? selectedLocation,
+  ) {
     final markers = <Marker>[];
-    final random = Random();
+
+    if (detail != null && selectedLocation != null) {
+      markers.add(
+        Marker(
+          point: selectedLocation,
+          width: 180,
+          height: 70,
+          child: GestureDetector(
+            onTap: () => _showMarkerInfo(
+              context,
+              detail.name,
+              detail.locationUrl ?? '',
+              isAr,
+            ),
+            child: Column(
+              children: [
+                const Icon(Icons.location_pin, color: Colors.red, size: 42),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  color: Colors.white,
+                  child: Text(
+                    detail.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      return markers;
+    }
 
     for (int i = 0; i < 6; i++) {
-      final city = _syriaCities[random.nextInt(_syriaCities.length)];
-      final location = _getRandomLocation(
-        LatLng(city['lat'], city['lng']),
-        2.5,
-      );
+      final city = _syriaCities[i % _syriaCities.length];
+      final location = LatLng(city['lat'], city['lng']);
       final title = isAr ? 'المفضلة ${i + 1}' : 'Favorite ${i + 1}';
       markers.add(
         Marker(

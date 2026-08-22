@@ -9,7 +9,7 @@ class LocalDatabase {
     final path = join(await getDatabasesPath(), 'tourism.db');
     _db = await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE hotels (
@@ -17,6 +17,8 @@ class LocalDatabase {
             name TEXT,
             description TEXT,
             location TEXT,
+            latitude REAL,
+            longitude REAL,
             rating REAL,
             pricePerNight INTEGER,
             phoneNumber TEXT,
@@ -30,6 +32,8 @@ class LocalDatabase {
             name TEXT,
             description TEXT,
             location TEXT,
+            latitude REAL,
+            longitude REAL,
             rating REAL,
             cuisineType TEXT,
             phoneNumber TEXT,
@@ -43,6 +47,8 @@ class LocalDatabase {
             name TEXT,
             description TEXT,
             location TEXT,
+            latitude REAL,
+            longitude REAL,
             rating REAL,
             category TEXT,
             images TEXT
@@ -55,6 +61,8 @@ class LocalDatabase {
             name TEXT,
             description TEXT,
             location TEXT,
+            latitude REAL,
+            longitude REAL,
             rating REAL,
             type TEXT,
             fare REAL,
@@ -89,6 +97,17 @@ class LocalDatabase {
               ownerId TEXT
             )
           ''');
+        }
+        if (oldVersion < 3) {
+          for (final table in [
+            'hotels',
+            'restaurants',
+            'attractions',
+            'transport',
+          ]) {
+            await db.execute('ALTER TABLE $table ADD COLUMN latitude REAL');
+            await db.execute('ALTER TABLE $table ADD COLUMN longitude REAL');
+          }
         }
       },
     );

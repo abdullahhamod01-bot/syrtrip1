@@ -234,6 +234,8 @@ class _HotelsViewState extends State<HotelsView> {
                                         phoneNumber: h.phoneNumber,
                                         pricePerNight: h.pricePerNight,
                                         locationUrl: h.location,
+                                        latitude: h.latitude,
+                                        longitude: h.longitude,
                                         type: DetailType.hotel,
                                       ),
                                     );

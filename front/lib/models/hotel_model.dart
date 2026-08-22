@@ -12,6 +12,8 @@ class HotelModel extends PlaceModel {
     required super.images,
     required super.location,
     required super.rating,
+    super.latitude,
+    super.longitude,
     required this.pricePerNight,
     this.phoneNumber,
   });
@@ -27,6 +29,8 @@ class HotelModel extends PlaceModel {
       images: _parseImages(json['images']),
       location: json['location'] ?? '',
       rating: _toDouble(json['rating']),
+      latitude: PlaceModel.parseLatitude(json),
+      longitude: PlaceModel.parseLongitude(json),
       pricePerNight: _toDouble(json['pricePerNight']),
       phoneNumber: json['phoneNumber'],
     );
@@ -43,6 +47,8 @@ class HotelModel extends PlaceModel {
       images: _parseImages(map['images']),
       location: map['location'] ?? '',
       rating: _toDouble(map['rating']),
+      latitude: PlaceModel.parseCoordinate(map['latitude'] ?? map['lat']),
+      longitude: PlaceModel.parseCoordinate(map['longitude'] ?? map['lng']),
       pricePerNight: _toDouble(map['pricePerNight']),
       phoneNumber: map['phoneNumber'],
     );

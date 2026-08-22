@@ -204,6 +204,8 @@ class _AttractionsViewState extends State<AttractionsView> {
                                   rating: p.rating,
                                   type: DetailType.attraction,
                                   locationUrl: p.location,
+                                  latitude: p.latitude,
+                                  longitude: p.longitude,
                                 ),
                               );
                             },

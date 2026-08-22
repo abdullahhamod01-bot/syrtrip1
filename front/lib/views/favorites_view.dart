@@ -209,6 +209,8 @@ class _FavoritesViewState extends State<FavoritesView> {
                                     : null,
 
                                 locationUrl: item.location,
+                                latitude: item.latitude,
+                                longitude: item.longitude,
                                 pricePerNight: item is HotelModel
                                     ? item.pricePerNight
                                     : null,

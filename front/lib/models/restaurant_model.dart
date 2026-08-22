@@ -12,6 +12,8 @@ class RestaurantModel extends PlaceModel {
     required super.images,
     required super.location,
     required super.rating,
+    super.latitude,
+    super.longitude,
     required this.cuisineType,
     required this.phoneNumber,
   });
@@ -24,6 +26,8 @@ class RestaurantModel extends PlaceModel {
       images: List<String>.from(json['images'] ?? []),
       location: json['location'] ?? '',
       rating: (json['rating'] ?? 0).toDouble(),
+      latitude: PlaceModel.parseLatitude(json),
+      longitude: PlaceModel.parseLongitude(json),
       cuisineType: json['cuisineType'] ?? '',
       phoneNumber: json['phoneNumber'],
     );
@@ -46,6 +50,8 @@ class RestaurantModel extends PlaceModel {
       images: List<String>.from(jsonDecode(map['images'])),
       location: map['location'],
       rating: map['rating'].toDouble(),
+      latitude: PlaceModel.parseCoordinate(map['latitude'] ?? map['lat']),
+      longitude: PlaceModel.parseCoordinate(map['longitude'] ?? map['lng']),
       cuisineType: map['cuisineType'],
       phoneNumber: map['phoneNumber'],
     );

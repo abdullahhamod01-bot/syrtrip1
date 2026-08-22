@@ -12,11 +12,15 @@ class TransportModel extends PlaceModel {
     required super.images,
     required super.location,
     required super.rating,
+    super.latitude,
+    super.longitude,
     required this.type,
     required this.fare,
   });
 
   factory TransportModel.fromJson(Map<String, dynamic> json) {
+    final office = json['office'];
+    final locationData = office is Map<String, dynamic> ? office : null;
     return TransportModel(
       id: json['_id'] ?? json['id'],
       name: json['name'] ?? '',
@@ -26,6 +30,16 @@ class TransportModel extends PlaceModel {
           ? json['office']['location'] ?? json['location'] ?? ''
           : json['location'] ?? '',
       rating: (json['rating'] ?? json['avgRating'] ?? 0).toDouble(),
+      latitude:
+          PlaceModel.parseLatitude(json) ??
+          (locationData == null
+              ? null
+              : PlaceModel.parseLatitude(locationData)),
+      longitude:
+          PlaceModel.parseLongitude(json) ??
+          (locationData == null
+              ? null
+              : PlaceModel.parseLongitude(locationData)),
       type: json['type'] ?? '',
       fare: (json['pricePerDay'] ?? json['fare'] ?? 0).toDouble(),
     );
@@ -44,6 +58,8 @@ class TransportModel extends PlaceModel {
       images: List<String>.from(jsonDecode(map['images'])),
       location: map['location'],
       rating: map['rating'].toDouble(),
+      latitude: PlaceModel.parseCoordinate(map['latitude'] ?? map['lat']),
+      longitude: PlaceModel.parseCoordinate(map['longitude'] ?? map['lng']),
       type: map['type'],
       fare: map['fare'].toDouble(),
     );

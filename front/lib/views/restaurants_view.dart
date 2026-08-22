@@ -206,6 +206,8 @@ class _RestaurantsViewState extends State<RestaurantsView> {
                                   rating: r.rating,
                                   phoneNumber: r.phoneNumber,
                                   locationUrl: r.location,
+                                  latitude: r.latitude,
+                                  longitude: r.longitude,
                                   type: DetailType.restaurant,
                                 ),
                               );

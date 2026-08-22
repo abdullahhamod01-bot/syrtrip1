@@ -224,6 +224,8 @@ class _TransportViewState extends State<TransportView> {
                             type: DetailType.transport,
                             phoneNumber: null,
                             locationUrl: t.location,
+                            latitude: t.latitude,
+                            longitude: t.longitude,
                             vehicleType: t.type,
                             pricePerNight: t.fare,
                           ),

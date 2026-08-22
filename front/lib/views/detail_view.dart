@@ -21,6 +21,8 @@ class DetailArguments {
   final DetailType type;
   final String? phoneNumber;
   final String? locationUrl;
+  final double? latitude;
+  final double? longitude;
   final String? vehicleType;
   final double? pricePerNight;
 
@@ -33,6 +35,8 @@ class DetailArguments {
     required this.type,
     this.phoneNumber,
     this.locationUrl,
+    this.latitude,
+    this.longitude,
     this.vehicleType,
     this.pricePerNight,
   });
@@ -698,8 +702,11 @@ class _DetailViewState extends State<DetailView> {
                   if (args.locationUrl != null) ...[
                     const SizedBox(height: 12),
                     ElevatedButton.icon(
-                      onPressed: () =>
-                          Navigator.pushNamed(context, '/favorites-map'),
+                      onPressed: () => Navigator.pushNamed(
+                        context,
+                        '/favorites-map',
+                        arguments: args,
+                      ),
                       icon: const Icon(Icons.location_on),
                       label: Text(isArabic ? "عرض الموقع" : "View location"),
                       style: ElevatedButton.styleFrom(

@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../../providers/app_provider.dart';
 import '../controllers/favorites_controller.dart';
+import '../models/place_model.dart';
+import 'detail_view.dart';
 
 class EventsView extends StatefulWidget {
   const EventsView({super.key});
@@ -189,6 +191,8 @@ class _EventsViewState extends State<EventsView> {
       'images': imageUrls.isNotEmpty ? imageUrls : [fallbackImage],
       'location': rawLocation,
       'locationEn': rawLocation,
+      'latitude': PlaceModel.parseLatitude(event),
+      'longitude': PlaceModel.parseLongitude(event),
       'price': _formatPrice(priceValue),
       'priceEn': _formatPrice(priceValue),
     };
@@ -879,8 +883,33 @@ class _EventsViewState extends State<EventsView> {
                           children: [
                             Expanded(
                               child: ElevatedButton.icon(
-                                onPressed: () =>
-                                    Navigator.pushNamed(context, '/map'),
+                                onPressed: () => Navigator.pushNamed(
+                                  context,
+                                  '/favorites-map',
+                                  arguments: DetailArguments(
+                                    id: event['id'].toString(),
+                                    name:
+                                        (isAr
+                                                ? event['titleAr']
+                                                : event['titleEn'])
+                                            .toString(),
+                                    description:
+                                        (isAr
+                                                ? event['descriptionAr']
+                                                : event['descriptionEn'])
+                                            .toString(),
+                                    images: _eventImages(event),
+                                    rating: 0,
+                                    type: DetailType.attraction,
+                                    locationUrl: event['location']?.toString(),
+                                    latitude: PlaceModel.parseCoordinate(
+                                      event['latitude'],
+                                    ),
+                                    longitude: PlaceModel.parseCoordinate(
+                                      event['longitude'],
+                                    ),
+                                  ),
+                                ),
                                 icon: const Icon(Icons.location_on),
                                 label: Text(
                                   isAr ? 'عرض الموقع' : 'View Location',
