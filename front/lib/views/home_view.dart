@@ -1,5 +1,6 @@
 // lib/views/home_view.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:SyrTrip/views/bookings_view.dart';
 import '../views/transport_view.dart';
 import '../views/hotels_view.dart';
@@ -7,6 +8,7 @@ import '../views/attractions_view.dart';
 import '../views/restaurants_view.dart';
 import '../views/favorites_view.dart';
 import '../widgets/bottom_nav_bar.dart';
+import '../providers/app_provider.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -16,7 +18,6 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   int _index = 2; // default to attractions like original
-  late final PageController _pageController;
 
   final List<Widget> _screens = const [
     TransportView(),
@@ -27,38 +28,28 @@ class _HomeViewState extends State<HomeView> {
     FavoritesView(),
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController(initialPage: _index);
-  }
+  void _handleSwipe(DragEndDetails details) {
+    final velocity = details.primaryVelocity ?? 0;
+    if (velocity.abs() < 250) return;
 
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
+    final isArabic = context.read<AppProvider>().isArabic;
+    final movingForward = isArabic ? velocity > 0 : velocity < 0;
+    final nextIndex = movingForward ? _index + 1 : _index - 1;
+    if (nextIndex < 0 || nextIndex >= _screens.length) return;
+    setState(() => _index = nextIndex);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          if (_index != index) setState(() => _index = index);
-        },
-        children: _screens,
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onHorizontalDragEnd: _handleSwipe,
+        child: _screens[_index],
       ),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _index,
-        onTap: (i) {
-          setState(() => _index = i);
-          _pageController.animateToPage(
-            i,
-            duration: const Duration(milliseconds: 280),
-            curve: Curves.easeInOut,
-          );
-        },
+        onTap: (i) => setState(() => _index = i),
       ),
     );
   }
