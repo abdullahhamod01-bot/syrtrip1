@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 import '../controllers/favorites_controller.dart';
 import '../providers/app_provider.dart';
@@ -15,8 +19,12 @@ class FavoritesMapView extends StatefulWidget {
 }
 
 class _FavoritesMapViewState extends State<FavoritesMapView> {
+  static const _locationChannel = MethodChannel('syrtrip/location');
   final MapController _mapController = MapController();
   int _favoriteCount = 0;
+  LatLng? _currentLocation;
+  List<LatLng> _routePoints = [];
+  bool _isLoadingLocation = false;
   final List<Map<String, dynamic>> _syriaCities = [
     {'name': 'دمشق', 'lat': 33.5138, 'lng': 36.2765},
     {'name': 'حلب', 'lat': 36.2021, 'lng': 37.1343},
@@ -37,6 +45,113 @@ class _FavoritesMapViewState extends State<FavoritesMapView> {
   void initState() {
     super.initState();
     _loadFavoriteCount();
+    _loadCurrentLocation();
+  }
+
+  Future<void> _loadCurrentLocation() async {
+    if (mounted) setState(() => _isLoadingLocation = true);
+
+    try {
+      final permission = await Permission.locationWhenInUse.request();
+      if (!permission.isGranted && !permission.isLimited) {
+        _showLocationMessage('يرجى السماح للتطبيق بالوصول إلى موقعك الحالي');
+        return;
+      }
+
+      final result = await _locationChannel.invokeMethod<Map<Object?, Object?>>(
+        'getCurrentLocation',
+      );
+      if (result == null) {
+        _showLocationMessage(
+          'تعذر تحديد موقعك. تأكد من تشغيل GPS ومنح صلاحية الموقع.',
+        );
+        return;
+      }
+      final latitude = (result['latitude'] as num?)?.toDouble();
+      final longitude = (result['longitude'] as num?)?.toDouble();
+      if (latitude == null || longitude == null) {
+        _showLocationMessage('لم يتم الحصول على إحداثيات موقعك الحالي.');
+        return;
+      }
+      if (mounted) {
+        setState(() {
+          _currentLocation = LatLng(latitude, longitude);
+        });
+        final arguments = ModalRoute.of(context)?.settings.arguments;
+        final detail = arguments is DetailArguments ? arguments : null;
+        if (detail?.latitude != null && detail?.longitude != null) {
+          final itemLocation = LatLng(detail!.latitude!, detail.longitude!);
+          setState(() => _routePoints = [itemLocation, _currentLocation!]);
+          _loadRoute(itemLocation, _currentLocation!);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _mapController.fitCamera(
+              CameraFit.bounds(
+                bounds: LatLngBounds.fromPoints([
+                  itemLocation,
+                  _currentLocation!,
+                ]),
+                padding: const EdgeInsets.all(56),
+              ),
+            );
+          });
+        } else {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _mapController.move(_currentLocation!, 15);
+          });
+        }
+      }
+    } catch (_) {
+      _showLocationMessage('حدث خطأ أثناء تحديد موقعك الحالي.');
+    } finally {
+      if (mounted) setState(() => _isLoadingLocation = false);
+    }
+  }
+
+  Future<void> _loadRoute(LatLng itemLocation, LatLng currentLocation) async {
+    try {
+      final uri = Uri.parse(
+        'https://router.project-osrm.org/route/v1/driving/'
+        '${currentLocation.longitude},${currentLocation.latitude};'
+        '${itemLocation.longitude},${itemLocation.latitude}'
+        '?overview=full&geometries=geojson',
+      );
+      final response = await http.get(uri);
+      if (response.statusCode != 200) return;
+
+      final decoded = jsonDecode(response.body);
+      final coordinates = decoded['routes']?[0]?['geometry']?['coordinates'];
+      if (coordinates is! List || coordinates.isEmpty || !mounted) return;
+
+      final points = coordinates
+          .whereType<List>()
+          .where((point) => point.length >= 2)
+          .map(
+            (point) => LatLng(
+              (point[1] as num).toDouble(),
+              (point[0] as num).toDouble(),
+            ),
+          )
+          .toList();
+      if (points.length >= 2) setState(() => _routePoints = points);
+    } catch (_) {
+      // Keep the straight fallback line when routing is unavailable.
+    }
+  }
+
+  void _showLocationMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void _centerOnCurrentLocation() {
+    final location = _currentLocation;
+    if (location == null) {
+      _loadCurrentLocation();
+      return;
+    }
+    _mapController.move(location, 15);
   }
 
   Future<void> _loadFavoriteCount() async {
@@ -96,13 +211,22 @@ class _FavoritesMapViewState extends State<FavoritesMapView> {
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   userAgentPackageName: 'com.example.syrtrip',
                 ),
-                MarkerLayer(
-                  markers: _buildMarkers(
-                    context,
-                    isAr,
-                    detail,
-                    selectedLocation,
+                if (_routePoints.length >= 2)
+                  PolylineLayer(
+                    polylines: [
+                      Polyline(
+                        points: _routePoints,
+                        color: Colors.blue,
+                        strokeWidth: 5,
+                      ),
+                    ],
                   ),
+                MarkerLayer(
+                  markers: [
+                    ..._buildMarkers(context, isAr, detail, selectedLocation),
+                    if (_currentLocation != null)
+                      _buildCurrentLocationMarker(context, isAr),
+                  ],
                 ),
               ],
             ),
@@ -138,8 +262,14 @@ class _FavoritesMapViewState extends State<FavoritesMapView> {
           const SizedBox(height: 8),
           FloatingActionButton.small(
             heroTag: 'center',
-            onPressed: () => _mapController.move(_syriaCenter, _defaultZoom),
-            child: const Icon(Icons.my_location),
+            onPressed: _centerOnCurrentLocation,
+            child: _isLoadingLocation
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.my_location),
           ),
         ],
       ),
@@ -245,6 +375,34 @@ class _FavoritesMapViewState extends State<FavoritesMapView> {
     }
 
     return markers;
+  }
+
+  Marker _buildCurrentLocationMarker(BuildContext context, bool isAr) {
+    return Marker(
+      point: _currentLocation!,
+      width: 150,
+      height: 62,
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: const BoxDecoration(
+              color: Colors.blue,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.person_pin_circle, color: Colors.white),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            color: Colors.white,
+            child: Text(
+              isAr ? 'موقعي الحالي' : 'My location',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showMarkerInfo(
